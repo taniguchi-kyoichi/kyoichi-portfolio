@@ -5,7 +5,7 @@ export const profile: Profile = {
 	nameEn: 'Kyoichi Taniguchi',
 	title: 'Software Engineer',
 	bio: 'ソフトウェアエンジニア。モバイルアプリ開発、Webアプリケーション開発、インフラ構築など幅広い領域で活動しています。',
-	avatar: '/avatar.png',
+	avatar: '/profile.jpg',
 	location: 'Japan',
 	socialLinks: [
 		{
