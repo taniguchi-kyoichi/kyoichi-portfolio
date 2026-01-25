@@ -38,7 +38,7 @@ export const ossProjects: OSSProject[] = [
 		repository: 'https://github.com/no-problem-dev/swift-llm-structured-outputs',
 		language: 'Swift',
 		topics: ['llm', 'ai', 'structured-output'],
-		featured: false
+		featured: true
 	},
 	{
 		id: 'llm-codable',
