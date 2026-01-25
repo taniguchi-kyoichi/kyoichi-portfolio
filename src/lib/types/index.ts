@@ -4,6 +4,7 @@ export type SocialPlatform =
 	| 'note'
 	| 'twitter'
 	| 'linkedin'
+	| 'youtube'
 	| 'email'
 	| 'website';
 

@@ -3,10 +3,10 @@ import type { Profile, Contact } from '$lib/types';
 export const profile: Profile = {
 	name: '谷口 恭一',
 	nameEn: 'Kyoichi Taniguchi',
-	title: 'Software Engineer',
-	bio: 'ソフトウェアエンジニア。モバイルアプリ開発、Webアプリケーション開発、インフラ構築など幅広い領域で活動しています。',
+	title: 'iOS Engineer',
+	bio: 'iOSエンジニア。Swift & SwiftUI を使ったネイティブiOSアプリ開発に情熱を注いでいます。モバイルアプリケーションへのAI統合技術も探求中。',
 	avatar: '/profile.jpg',
-	location: 'Japan',
+	location: '神奈川県横浜市',
 	socialLinks: [
 		{
 			platform: 'github',
@@ -19,19 +19,14 @@ export const profile: Profile = {
 			label: 'Zenn'
 		},
 		{
-			platform: 'note',
-			url: 'https://note.com/kyoichi',
-			label: 'note'
-		},
-		{
-			platform: 'twitter',
-			url: 'https://twitter.com/kyoichi',
-			label: 'X (Twitter)'
+			platform: 'youtube',
+			url: 'https://youtube.com/@taniguchi-kyoichi',
+			label: 'YouTube'
 		}
 	]
 };
 
 export const contact: Contact = {
-	email: 'contact@example.com',
+	email: 'info@taniguchi-kyoichi.com',
 	message: 'お仕事のご依頼やお問い合わせはメールにてご連絡ください。'
 };
