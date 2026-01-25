@@ -40,14 +40,23 @@ export interface Product {
 	id: string;
 	name: string;
 	description: string;
+	fullDescription?: string;
 	type: ProductType;
 	status: ProductStatus;
 	platforms: Platform[];
 	links: ProductLinks;
 	technologies: string[];
 	thumbnail?: string;
+	screenshots?: string[];
 	releaseDate?: string;
 	featured?: boolean;
+	version?: string;
+	rating?: number;
+	ratingCount?: number;
+	price?: string;
+	category?: string;
+	ageRating?: string;
+	features?: string[];
 }
 
 export interface OSSProject {
