@@ -75,3 +75,31 @@ export interface Contact {
 	formUrl?: string;
 	message?: string;
 }
+
+export type ArticleSource = 'zenn' | 'note' | 'other';
+
+export interface Article {
+	title: string;
+	url: string;
+	publishedAt: string;
+	description?: string;
+	thumbnail?: string;
+	source: ArticleSource;
+}
+
+export interface YouTubeVideo {
+	videoId: string;
+	title: string;
+	url: string;
+	publishedAt: string;
+	description?: string;
+	thumbnail: string;
+}
+
+export interface YouTubePlaylist {
+	playlistId: string;
+	title: string;
+	channelName: string;
+	channelUrl: string;
+	videos: YouTubeVideo[];
+}

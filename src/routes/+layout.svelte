@@ -57,6 +57,22 @@
 					</li>
 					<li>
 						<a
+							href="/writings"
+							class="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+						>
+							Writings
+						</a>
+					</li>
+					<li>
+						<a
+							href="/#youtube"
+							class="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+						>
+							YouTube
+						</a>
+					</li>
+					<li>
+						<a
 							href="/#contact"
 							class="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
 						>

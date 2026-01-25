@@ -98,6 +98,24 @@
 				</li>
 				<li>
 					<a
+						href="/writings"
+						onclick={close}
+						class="flex h-12 items-center rounded-lg px-4 text-base font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+					>
+						Writings
+					</a>
+				</li>
+				<li>
+					<a
+						href="/#youtube"
+						onclick={close}
+						class="flex h-12 items-center rounded-lg px-4 text-base font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+					>
+						YouTube
+					</a>
+				</li>
+				<li>
+					<a
 						href="/#contact"
 						onclick={close}
 						class="flex h-12 items-center rounded-lg px-4 text-base font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"

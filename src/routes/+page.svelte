@@ -5,6 +5,10 @@
 	import SocialIcon from '$lib/components/SocialIcon.svelte';
 	import ProductCard from '$lib/components/ProductCard.svelte';
 	import OSSCard from '$lib/components/OSSCard.svelte';
+	import ArticleCard from '$lib/components/ArticleCard.svelte';
+	import { formatDate } from '$lib/utils/rss';
+
+	let { data } = $props();
 </script>
 
 <svelte:head>
@@ -132,6 +136,101 @@
 					</a>
 				</div>
 			{/if}
+		</div>
+	</section>
+{/if}
+
+<!-- Writings Section -->
+{#if data.articles.length > 0}
+	<section id="writings" class="bg-gray-50 py-12 md:py-20 dark:bg-gray-800/50">
+		<div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+			<h2 class="mb-2 text-center text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
+				Writings
+			</h2>
+			<p class="mb-8 text-center text-sm text-gray-600 sm:mb-12 sm:text-base dark:text-gray-400">
+				技術記事・ブログ
+			</p>
+
+			<div class="grid gap-4 sm:gap-6">
+				{#each data.articles as article}
+					<ArticleCard {article} />
+				{/each}
+			</div>
+
+			<div class="mt-8 text-center sm:mt-12">
+				<a
+					href="/writings"
+					class="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-primary-600 dark:hover:bg-gray-700 dark:hover:text-primary-400"
+				>
+					すべての記事を見る
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+					</svg>
+				</a>
+			</div>
+		</div>
+	</section>
+{/if}
+
+<!-- YouTube Section -->
+{#if data.youtubePlaylist && data.youtubePlaylist.videos.length > 0}
+	<section id="youtube" class="bg-white py-12 md:py-20 dark:bg-gray-900">
+		<div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+			<h2 class="mb-2 text-center text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
+				YouTube
+			</h2>
+			<p class="mb-8 text-center text-sm text-gray-600 sm:mb-12 sm:text-base dark:text-gray-400">
+				{data.youtubePlaylist.title}
+			</p>
+
+			<div class="grid gap-4 sm:gap-6 md:grid-cols-2">
+				{#each data.youtubePlaylist.videos as video}
+					<a
+						href={video.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:border-primary-300 hover:shadow-md sm:rounded-2xl dark:border-gray-700 dark:bg-gray-800 dark:hover:border-primary-600"
+					>
+						<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
+							<img
+								src={video.thumbnail}
+								alt={video.title}
+								class="h-full w-full object-cover transition-transform group-hover:scale-105"
+							/>
+							<div class="absolute inset-0 flex items-center justify-center">
+								<div class="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-transform group-hover:scale-110">
+									<svg class="h-5 w-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+										<path d="M8 5v14l11-7z" />
+									</svg>
+								</div>
+							</div>
+						</div>
+						<div class="p-4">
+							<p class="mb-1 text-xs text-gray-500 dark:text-gray-400">
+								{formatDate(video.publishedAt)}
+							</p>
+							<h3 class="line-clamp-2 text-sm font-semibold text-gray-900 group-hover:text-primary-600 sm:text-base dark:text-white dark:group-hover:text-primary-400">
+								{video.title}
+							</h3>
+						</div>
+					</a>
+				{/each}
+			</div>
+
+			<div class="mt-8 text-center sm:mt-12">
+				<a
+					href={data.youtubePlaylist.channelUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-red-600 dark:hover:bg-gray-700 dark:hover:text-red-400"
+				>
+					<SocialIcon platform="youtube" class="h-5 w-5" />
+					チャンネルを見る
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+					</svg>
+				</a>
+			</div>
 		</div>
 	</section>
 {/if}
