@@ -1,6 +1,17 @@
 import type { OSSProject } from '$lib/types';
 
 export const ossProjects: OSSProject[] = [
+	// Tools
+	{
+		id: 'claude-code-plugins',
+		name: 'claude-code-plugins',
+		description: 'Claude Code プラグイン集 - iOS/Go開発、Firebase Emulator、リリース自動化、通知ツール',
+		repository: 'https://github.com/no-problem-dev/claude-code-plugins',
+		language: 'Shell',
+		topics: ['claude-code', 'plugins', 'automation'],
+		featured: true
+	},
+
 	// Featured (Star 2+, Fork 1+)
 	{
 		id: 'swift-design-system',
@@ -38,7 +49,7 @@ export const ossProjects: OSSProject[] = [
 		repository: 'https://github.com/no-problem-dev/swift-llm-structured-outputs',
 		language: 'Swift',
 		topics: ['llm', 'ai', 'structured-output'],
-		featured: true
+		featured: false
 	},
 	{
 		id: 'llm-codable',

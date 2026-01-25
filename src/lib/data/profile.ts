@@ -10,7 +10,7 @@ export const profile: Profile = {
 	socialLinks: [
 		{
 			platform: 'github',
-			url: 'https://github.com/kyoichi-taniguchi',
+			url: 'https://github.com/taniguchi-kyoichi',
 			label: 'GitHub'
 		},
 		{

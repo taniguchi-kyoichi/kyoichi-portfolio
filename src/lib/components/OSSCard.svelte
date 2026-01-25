@@ -16,7 +16,8 @@
 		Rust: 'bg-orange-600',
 		Go: 'bg-cyan-500',
 		Python: 'bg-green-500',
-		Ruby: 'bg-red-500'
+		Ruby: 'bg-red-500',
+		Shell: 'bg-gray-500'
 	};
 </script>
 
@@ -55,23 +56,19 @@
 
 	<div class="flex flex-wrap gap-2">
 		<a
+			href="/oss/{project.id}"
+			class="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-700 sm:min-h-[32px] dark:bg-primary-500 dark:hover:bg-primary-600"
+		>
+			詳細を見る
+		</a>
+		<a
 			href={project.repository}
 			target="_blank"
 			rel="noopener noreferrer"
 			class="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:min-h-[32px] dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 		>
 			<SocialIcon platform="github" class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-			<span class="hidden xs:inline">View</span> Repository
+			GitHub
 		</a>
-		{#if project.homepage}
-			<a
-				href={project.homepage}
-				target="_blank"
-				rel="noopener noreferrer"
-				class="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:min-h-[32px] dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-			>
-				Website
-			</a>
-		{/if}
 	</div>
 </article>
