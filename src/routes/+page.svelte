@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { profile, contact } from '$lib/data/profile';
 	import { products } from '$lib/data/products';
-	import { ossProjects } from '$lib/data/oss';
+	import { featuredOSS, ossProjects } from '$lib/data/oss';
 	import SocialIcon from '$lib/components/SocialIcon.svelte';
 	import ProductCard from '$lib/components/ProductCard.svelte';
 	import OSSCard from '$lib/components/OSSCard.svelte';
@@ -111,10 +111,27 @@
 			</p>
 
 			<div class="grid gap-4 sm:gap-6 md:grid-cols-2">
-				{#each ossProjects as project}
+				{#each featuredOSS as project}
 					<OSSCard {project} />
 				{/each}
 			</div>
+
+			{#if ossProjects.length > featuredOSS.length}
+				<div class="mt-8 text-center sm:mt-12">
+					<a
+						href="/oss"
+						class="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-primary-600 dark:hover:bg-gray-700 dark:hover:text-primary-400"
+					>
+						すべてのOSSを見る
+						<span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs dark:bg-gray-700">
+							{ossProjects.length}
+						</span>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						</svg>
+					</a>
+				</div>
+			{/if}
 		</div>
 	</section>
 {/if}
