@@ -95,7 +95,7 @@
 					href={data.project.repository}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+					class="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
 				>
 					<SocialIcon platform="github" class="h-5 w-5" />
 					View on GitHub

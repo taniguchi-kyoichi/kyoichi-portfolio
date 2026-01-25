@@ -73,3 +73,47 @@ h6 {
 p {
 	text-wrap: pretty;
 }
+
+/* README badge images should be inline (horizontal) */
+.prose p > img {
+	display: inline-block;
+	margin: 0 0.25rem 0.25rem 0;
+}
+
+/* When paragraph only contains images, make it flex container */
+.prose p:has(> img:first-child):has(> img:last-child):not(:has(> :not(img):not(a))) {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+/* Also handle images wrapped in links (common for badges) */
+.prose p > a > img {
+	display: inline-block;
+	margin: 0;
+}
+
+/* Code blocks: reset inline code styles inside pre */
+.prose pre code {
+	background-color: transparent !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+	font-size: inherit;
+	color: inherit;
+}
+
+/* Code block styling */
+.prose pre {
+	background-color: #1f2937;
+	color: #e5e7eb;
+	overflow-x: auto;
+	padding: 1rem;
+	border-radius: 0.5rem;
+}
+
+/* Dark mode code block */
+.dark .prose pre {
+	background-color: #1e293b;
+	border: 1px solid #334155;
+}
