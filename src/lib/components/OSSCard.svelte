@@ -21,7 +21,8 @@
 	};
 </script>
 
-<article
+<a
+	href="/oss/{project.id}"
 	class="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-primary-300 hover:shadow-md sm:rounded-2xl sm:p-6 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-primary-600"
 >
 	<div class="mb-2 flex items-center gap-2 sm:mb-3">
@@ -43,7 +44,7 @@
 	</div>
 
 	{#if project.topics && project.topics.length > 0}
-		<div class="mb-3 flex flex-wrap gap-1 sm:mb-4 sm:gap-1.5">
+		<div class="flex flex-wrap gap-1 sm:gap-1.5">
 			{#each project.topics.slice(0, 4) as topic}
 				<span
 					class="rounded-md bg-primary-50 px-1.5 py-0.5 text-xs font-medium text-primary-700 sm:px-2 dark:bg-primary-900/30 dark:text-primary-400"
@@ -53,22 +54,4 @@
 			{/each}
 		</div>
 	{/if}
-
-	<div class="flex flex-wrap gap-2">
-		<a
-			href="/oss/{project.id}"
-			class="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-700 sm:min-h-[32px] dark:bg-primary-500 dark:hover:bg-primary-600"
-		>
-			詳細を見る
-		</a>
-		<a
-			href={project.repository}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 sm:min-h-[32px] dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-		>
-			<SocialIcon platform="github" class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-			GitHub
-		</a>
-	</div>
-</article>
+</a>
