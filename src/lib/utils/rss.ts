@@ -1,6 +1,24 @@
 import { XMLParser } from 'fast-xml-parser';
 import type { Article, ArticleSource, YouTubePlaylist, YouTubeVideo } from '$lib/types';
 
+// YouTube Data API v3 response types
+interface YouTubeAPIResponse {
+	items?: Array<{
+		snippet: {
+			publishedAt: string;
+			title: string;
+			description: string;
+			thumbnails: {
+				high?: { url: string };
+			};
+			channelTitle: string;
+			resourceId: {
+				videoId: string;
+			};
+		};
+	}>;
+}
+
 interface RSSItem {
 	title: string;
 	link: string;
@@ -72,72 +90,47 @@ export function formatDate(dateString: string): string {
 	});
 }
 
-// YouTube RSS types
-interface YouTubeRSSEntry {
-	'yt:videoId': string;
-	title: string;
-	link: { '@_href': string };
-	published: string;
-	'media:group': {
-		'media:description': string;
-		'media:thumbnail': { '@_url': string };
-	};
-}
-
-interface YouTubeRSSFeed {
-	feed: {
-		'yt:playlistId': string;
-		title: string;
-		author: {
-			name: string;
-			uri: string;
-		};
-		entry: YouTubeRSSEntry | YouTubeRSSEntry[];
-	};
-}
-
-export async function fetchYouTubePlaylist(
-	playlistId: string,
-	fetcher: typeof fetch
+export async function fetchYouTubeChannel(
+	channelId: string,
+	apiKey: string,
+	maxResults: number = 4
 ): Promise<YouTubePlaylist | null> {
-	const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
+	const uploadsPlaylistId = 'UU' + channelId.slice(2);
+	const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=${maxResults}&key=${apiKey}`;
 
 	try {
-		const response = await fetcher(feedUrl);
+		const response = await fetch(url);
 		if (!response.ok) {
-			console.error(`Failed to fetch YouTube RSS: ${response.status}`);
+			console.error(`Failed to fetch YouTube API: ${response.status}`);
 			return null;
 		}
 
-		const xml = await response.text();
-		const feed = parser.parse(xml) as YouTubeRSSFeed;
-
-		const entries = feed.feed.entry;
-		if (!entries) {
-			console.error('No entries found in YouTube RSS');
+		const data = (await response.json()) as YouTubeAPIResponse;
+		if (!data.items?.length) {
+			console.error('No items found in YouTube API response');
 			return null;
 		}
 
-		const entryArray = Array.isArray(entries) ? entries : [entries];
-
-		const videos: YouTubeVideo[] = entryArray.map((entry) => ({
-			videoId: entry['yt:videoId'],
-			title: entry.title,
-			url: entry.link['@_href'],
-			publishedAt: entry.published,
-			description: entry['media:group']?.['media:description'] ?? '',
-			thumbnail: entry['media:group']?.['media:thumbnail']?.['@_url'] ?? `https://i.ytimg.com/vi/${entry['yt:videoId']}/hqdefault.jpg`
+		const videos: YouTubeVideo[] = data.items.map((item) => ({
+			videoId: item.snippet.resourceId.videoId,
+			title: item.snippet.title,
+			url: `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`,
+			publishedAt: item.snippet.publishedAt,
+			description: item.snippet.description,
+			thumbnail:
+				item.snippet.thumbnails.high?.url ??
+				`https://i.ytimg.com/vi/${item.snippet.resourceId.videoId}/hqdefault.jpg`
 		}));
 
 		return {
-			playlistId: feed.feed['yt:playlistId'],
-			title: feed.feed.title,
-			channelName: feed.feed.author.name,
-			channelUrl: feed.feed.author.uri,
+			playlistId: uploadsPlaylistId,
+			title: data.items[0].snippet.channelTitle,
+			channelName: data.items[0].snippet.channelTitle,
+			channelUrl: `https://www.youtube.com/channel/${channelId}`,
 			videos
 		};
 	} catch (error) {
-		console.error('Error fetching YouTube playlist:', error);
+		console.error('Error fetching YouTube channel:', error);
 		return null;
 	}
 }
