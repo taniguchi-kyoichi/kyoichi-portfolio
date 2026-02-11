@@ -36,6 +36,21 @@ export interface ProductLinks {
 	docs?: string;
 }
 
+export interface PrivacyConfig {
+	effectiveDate: string;
+	dataCollection: 'none' | 'minimal' | 'standard';
+	dataItems?: string[];
+	thirdPartyServices?: string[];
+	analyticsUsed?: boolean;
+	contactEmail: string;
+}
+
+export interface SupportConfig {
+	contactEmail: string;
+	faq?: { question: string; answer: string }[];
+	systemRequirements?: string;
+}
+
 export interface Product {
 	id: string;
 	name: string;
@@ -57,6 +72,8 @@ export interface Product {
 	category?: string;
 	ageRating?: string;
 	features?: string[];
+	privacy?: PrivacyConfig;
+	support?: SupportConfig;
 }
 
 export interface OSSProject {

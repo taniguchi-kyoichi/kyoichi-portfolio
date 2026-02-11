@@ -30,7 +30,79 @@ export const products: Product[] = [
 			'ジャンル・ステータス・評価別の読書統計',
 			'AIアシスタントとの対話機能',
 			'ダークモード対応'
-		]
+		],
+		privacy: {
+			effectiveDate: '2026-02-11',
+			dataCollection: 'minimal',
+			dataItems: ['読書記録データ（端末内保存）', 'AI対話履歴（端末内保存）'],
+			thirdPartyServices: ['OpenAI API（AI対話機能）'],
+			analyticsUsed: false,
+			contactEmail: 'info@taniguchi-kyoichi.com'
+		},
+		support: {
+			contactEmail: 'info@taniguchi-kyoichi.com',
+			faq: [
+				{
+					question: 'データはクラウドに保存されますか？',
+					answer: '読書記録やメモはすべて端末内に保存されます。外部サーバーへのデータ送信は行いません。'
+				},
+				{
+					question: 'AI機能にはインターネット接続が必要ですか？',
+					answer: 'AI対話機能を使用する場合のみインターネット接続が必要です。それ以外の機能はオフラインで利用できます。'
+				},
+				{
+					question: 'アプリを削除するとデータは消えますか？',
+					answer: 'はい、アプリを削除するとすべてのデータが端末から削除されます。'
+				}
+			],
+			systemRequirements: 'iOS 17.0以上'
+		}
+	},
+	{
+		id: 'markdown-preview',
+		name: 'MDCanvas',
+		description:
+			'Markdownファイルをリアルタイムでプレビューできるビューアアプリ。iCloudやFilesアプリと連携し、どこからでもMarkdownを美しく表示します。',
+		fullDescription:
+			'MDCanvasは、Markdownファイルを美しくレンダリングするiOS向けビューアアプリです。iCloud DriveやFilesアプリからMarkdownファイルを開き、リアルタイムでプレビューできます。Share Extensionにも対応しており、他のアプリからMarkdownファイルを直接開くことも可能です。',
+		type: 'app',
+		status: 'production',
+		platforms: ['ios'],
+		links: {
+			appStore: 'https://apps.apple.com/app/id6742066987'
+		},
+		technologies: ['Swift', 'SwiftUI', 'WebKit'],
+		thumbnail: '/mdcanvas-icon.jpg',
+		featured: true,
+		price: '無料',
+		category: '仕事効率化',
+		ageRating: '4+',
+		features: [
+			'Markdownリアルタイムプレビュー',
+			'iCloud Drive / Files連携',
+			'Share Extension対応',
+			'シンタックスハイライト',
+			'ダークモード対応'
+		],
+		privacy: {
+			effectiveDate: '2026-02-11',
+			dataCollection: 'none',
+			contactEmail: 'info@taniguchi-kyoichi.com'
+		},
+		support: {
+			contactEmail: 'info@taniguchi-kyoichi.com',
+			faq: [
+				{
+					question: 'どのファイル形式に対応していますか？',
+					answer: '.md および .markdown ファイルに対応しています。'
+				},
+				{
+					question: 'iCloud以外のクラウドストレージは使えますか？',
+					answer: 'Filesアプリに対応しているクラウドストレージ（Dropbox、Google Drive等）からファイルを開くことができます。'
+				}
+			],
+			systemRequirements: 'iOS 17.0以上'
+		}
 	}
 ];
 
