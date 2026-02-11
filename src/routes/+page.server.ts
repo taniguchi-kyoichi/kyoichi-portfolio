@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { fetchArticlesFromRSS, fetchYouTubePlaylist } from '$lib/utils/rss';
 
-const RSS_FEEDS = ['https://zenn.dev/kyoichi/feed'];
+const RSS_FEEDS = ['https://zenn.dev/kyoichi/feed', 'https://note.com/note_kyoichi/rss'];
 const YOUTUBE_PLAYLIST_ID = 'PLBpEsYBOVBHRHc7Xz8439w-SNfV4NxChe';
 const MAX_ARTICLES_ON_HOME = 4;
 const MAX_VIDEOS_ON_HOME = 4;

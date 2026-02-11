@@ -19,6 +19,11 @@ export const profile: Profile = {
 			label: 'Zenn'
 		},
 		{
+			platform: 'note',
+			url: 'https://note.com/note_kyoichi',
+			label: 'note'
+		},
+		{
 			platform: 'youtube',
 			url: 'https://youtube.com/@taniguchi-kyoichi',
 			label: 'YouTube'

@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { fetchArticlesFromRSS } from '$lib/utils/rss';
 
-const RSS_FEEDS = ['https://zenn.dev/kyoichi/feed'];
+const RSS_FEEDS = ['https://zenn.dev/kyoichi/feed', 'https://note.com/note_kyoichi/rss'];
 
 export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
 	// Set cache headers for edge caching
