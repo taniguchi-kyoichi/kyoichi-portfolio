@@ -22,6 +22,18 @@
 <svelte:head>
 	<title>サポート - {product.name} | {profile.name}</title>
 	<meta name="description" content="{product.name}のサポートページ" />
+	<meta name="robots" content="noindex, nofollow" />
+	{#if support.faq && support.faq.length > 0}
+		{@html `<script type="application/ld+json">${JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'FAQPage',
+			mainEntity: support.faq.map(item => ({
+				'@type': 'Question',
+				name: item.question,
+				acceptedAnswer: { '@type': 'Answer', text: item.answer }
+			}))
+		})}</script>`}
+	{/if}
 </svelte:head>
 
 <article class="min-h-screen bg-gray-50 dark:bg-gray-900">

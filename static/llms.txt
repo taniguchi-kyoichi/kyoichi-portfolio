@@ -1,0 +1,32 @@
+# Kyoichi Taniguchi - iOS Engineer Portfolio
+
+> iOSエンジニア 谷口 恭一のポートフォリオサイト。Swift & SwiftUI を使ったiOSアプリ開発、OSSプロジェクト、技術記事を掲載。
+
+## About
+- Name: 谷口 恭一 (Kyoichi Taniguchi)
+- Role: iOS Engineer
+- Location: 神奈川県横浜市
+- Focus: Swift, SwiftUI, iOS native app development, AI integration
+
+## Sections
+- [Home](https://taniguchi-kyoichi.com/): プロフィール・最新記事・YouTube
+- [Writings](https://taniguchi-kyoichi.com/writings): Zenn・note の技術記事一覧
+- [Open Source](https://taniguchi-kyoichi.com/oss): OSSプロジェクト一覧 (17+)
+- [Products](https://taniguchi-kyoichi.com/products/reading-memory): iOS アプリ
+
+## Featured Products
+- 読書メモリー: AI対話型の読書管理アプリ (iOS, App Store公開中)
+- MDCanvas: Markdownリアルタイムプレビューアプリ (iOS, 開発中)
+
+## Featured OSS
+- claude-code-plugins: Claude Code plugins for iOS/Go/Firebase
+- swift-design-system: SwiftUI design system with tokens
+- swift-ui-routing: Type-safe SwiftUI routing library
+- swift-statable: Swift Macro for Observable State Management
+
+## Links
+- GitHub: https://github.com/taniguchi-kyoichi
+- Zenn: https://zenn.dev/kyoichi
+- note: https://note.com/note_kyoichi
+- YouTube: https://youtube.com/@taniguchi-kyoichi
+- Email: info@taniguchi-kyoichi.com

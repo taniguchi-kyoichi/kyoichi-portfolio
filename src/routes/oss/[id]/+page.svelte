@@ -38,6 +38,17 @@
 <svelte:head>
 	<title>{data.project.name} | {profile.name}</title>
 	<meta name="description" content={data.project.description} />
+	<meta property="og:title" content="{data.project.name} | {profile.name}" />
+	<meta property="og:description" content={data.project.description} />
+	{@html `<script type="application/ld+json">${JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'SoftwareSourceCode',
+		name: data.project.name,
+		description: data.project.description,
+		codeRepository: data.project.repository,
+		programmingLanguage: data.project.language,
+		author: { '@type': 'Person', name: profile.name, url: 'https://taniguchi-kyoichi.com' }
+	})}</script>`}
 </svelte:head>
 
 <article class="bg-white py-12 md:py-20 dark:bg-gray-900">

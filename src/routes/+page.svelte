@@ -13,6 +13,21 @@
 
 <svelte:head>
 	<title>{profile.name} | {profile.title}</title>
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="{profile.name} | {profile.title}" />
+	<meta property="og:description" content={profile.bio} />
+	{@html `<script type="application/ld+json">${JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'Person',
+		name: profile.name,
+		alternateName: profile.nameEn,
+		jobTitle: profile.title,
+		url: 'https://taniguchi-kyoichi.com',
+		image: 'https://taniguchi-kyoichi.com/profile.jpg',
+		address: { '@type': 'PostalAddress', addressLocality: profile.location },
+		sameAs: profile.socialLinks.map(l => l.url),
+		knowsAbout: ['Swift', 'SwiftUI', 'iOS Development', 'AI Integration']
+	})}</script>`}
 </svelte:head>
 
 <!-- Hero Section -->

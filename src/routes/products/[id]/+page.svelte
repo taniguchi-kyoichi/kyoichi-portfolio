@@ -36,6 +36,33 @@
 <svelte:head>
 	<title>{data.product.name} | {profile.name}</title>
 	<meta name="description" content={data.product.description} />
+	<meta property="og:title" content="{data.product.name} | {profile.name}" />
+	<meta property="og:description" content={data.product.description} />
+	{#if data.product.thumbnail}
+		<meta property="og:image" content="https://taniguchi-kyoichi.com{data.product.thumbnail}" />
+	{/if}
+	{@html `<script type="application/ld+json">${JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'SoftwareApplication',
+		name: data.product.name,
+		description: data.product.description,
+		applicationCategory: data.product.category ?? 'MobileApplication',
+		operatingSystem: data.product.platforms.includes('ios') ? 'iOS' : undefined,
+		offers: {
+			'@type': 'Offer',
+			price: data.product.price === '無料' ? '0' : data.product.price,
+			priceCurrency: 'JPY'
+		},
+		...(data.product.rating !== undefined ? {
+			aggregateRating: {
+				'@type': 'AggregateRating',
+				ratingValue: data.product.rating,
+				ratingCount: data.product.ratingCount ?? 1,
+				bestRating: 5
+			}
+		} : {}),
+		author: { '@type': 'Person', name: profile.name, url: 'https://taniguchi-kyoichi.com' }
+	})}</script>`}
 </svelte:head>
 
 <article class="min-h-screen bg-gray-50 dark:bg-gray-900">

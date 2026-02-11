@@ -7,6 +7,8 @@
 <svelte:head>
 	<title>Open Source | {profile.name}</title>
 	<meta name="description" content="{profile.name}が公開しているOSSプロジェクト一覧" />
+	<meta property="og:title" content="Open Source | {profile.name}" />
+	<meta property="og:description" content="{profile.name}が公開しているOSSプロジェクト一覧（{ossProjects.length}件）" />
 </svelte:head>
 
 <section class="bg-white py-12 md:py-20 dark:bg-gray-900">

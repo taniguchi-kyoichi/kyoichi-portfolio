@@ -8,6 +8,8 @@
 <svelte:head>
 	<title>Writings | {profile.name}</title>
 	<meta name="description" content="{profile.name}が執筆した技術記事一覧" />
+	<meta property="og:title" content="Writings | {profile.name}" />
+	<meta property="og:description" content="{profile.name}が執筆した技術記事一覧。Zenn・noteで公開中の技術ブログ。" />
 </svelte:head>
 
 <section class="bg-white py-12 md:py-20 dark:bg-gray-900">

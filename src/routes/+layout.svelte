@@ -4,17 +4,43 @@
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import MobileMenu from '$lib/components/MobileMenu.svelte';
 
+	const SITE_URL = 'https://taniguchi-kyoichi.com';
+
 	interface Props {
 		children: import('svelte').Snippet;
+		data: { url: string };
 	}
 
-	let { children }: Props = $props();
+	let { children, data }: Props = $props();
 
 	let mobileMenuOpen = $state(false);
+
+	const websiteJsonLd = {
+		'@context': 'https://schema.org',
+		'@type': 'WebSite',
+		name: profile.name,
+		url: SITE_URL,
+		author: {
+			'@type': 'Person',
+			name: profile.name,
+			jobTitle: profile.title,
+			url: SITE_URL
+		}
+	};
 </script>
 
 <svelte:head>
 	<meta name="description" content="{profile.name} - {profile.title}" />
+	<link rel="canonical" href="{SITE_URL}{data.url}" />
+	<meta property="og:site_name" content={profile.name} />
+	<meta property="og:locale" content="ja_JP" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="{SITE_URL}{data.url}" />
+	<meta property="og:title" content="{profile.name} - {profile.title}" />
+	<meta property="og:description" content="{profile.name} - {profile.title}" />
+	<meta property="og:image" content="{SITE_URL}/profile.jpg" />
+	<meta name="twitter:card" content="summary" />
+	{@html `<script type="application/ld+json">${JSON.stringify(websiteJsonLd)}</script>`}
 	<script>
 		// Prevent flash of wrong theme
 		(function () {

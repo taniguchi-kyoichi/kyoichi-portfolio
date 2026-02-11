@@ -22,6 +22,7 @@
 <svelte:head>
 	<title>プライバシーポリシー - {product.name} | {profile.name}</title>
 	<meta name="description" content="{product.name}のプライバシーポリシー" />
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <article class="min-h-screen bg-gray-50 dark:bg-gray-900">
