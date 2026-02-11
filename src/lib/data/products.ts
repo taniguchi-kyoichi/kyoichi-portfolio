@@ -66,11 +66,9 @@ export const products: Product[] = [
 		fullDescription:
 			'MDCanvasは、Markdownファイルを美しくレンダリングするiOS向けビューアアプリです。iCloud DriveやFilesアプリからMarkdownファイルを開き、リアルタイムでプレビューできます。Share Extensionにも対応しており、他のアプリからMarkdownファイルを直接開くことも可能です。',
 		type: 'app',
-		status: 'production',
+		status: 'development',
 		platforms: ['ios'],
-		links: {
-			appStore: 'https://apps.apple.com/app/id6742066987'
-		},
+		links: {},
 		technologies: ['Swift', 'SwiftUI', 'WebKit'],
 		thumbnail: '/mdcanvas-icon.jpg',
 		featured: true,
