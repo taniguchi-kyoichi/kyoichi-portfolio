@@ -9,6 +9,8 @@
 	}
 
 	let { children }: Props = $props();
+
+	let mobileMenuOpen = $state(false);
 </script>
 
 <svelte:head>
@@ -83,10 +85,28 @@
 				<ThemeToggle />
 			</div>
 
-			<!-- Mobile menu -->
-			<MobileMenu />
+			<!-- Mobile menu button -->
+			<button
+				onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
+				class="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 md:hidden dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+				aria-label={mobileMenuOpen ? 'メニューを閉じる' : 'メニューを開く'}
+				aria-expanded={mobileMenuOpen}
+			>
+				{#if mobileMenuOpen}
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				{:else}
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+					</svg>
+				{/if}
+			</button>
 		</nav>
 	</header>
+
+	<!-- Mobile menu: OUTSIDE header to avoid backdrop-filter containing block -->
+	<MobileMenu bind:isOpen={mobileMenuOpen} />
 
 	<main>
 		{@render children()}

@@ -2,17 +2,12 @@
 	import { profile } from '$lib/data/profile';
 	import ThemeToggle from './ThemeToggle.svelte';
 
-	let isOpen = $state(false);
-
-	function toggle() {
-		isOpen = !isOpen;
-	}
+	let { isOpen = $bindable(false) }: { isOpen: boolean } = $props();
 
 	function close() {
 		isOpen = false;
 	}
 
-	// Close menu on escape key
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape' && isOpen) {
 			close();
@@ -21,26 +16,6 @@
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
-
-<!-- Mobile menu button -->
-<button
-	onclick={toggle}
-	class="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 md:hidden dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
-	aria-label={isOpen ? 'メニューを閉じる' : 'メニューを開く'}
-	aria-expanded={isOpen}
->
-	{#if isOpen}
-		<!-- Close icon -->
-		<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-		</svg>
-	{:else}
-		<!-- Hamburger icon -->
-		<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-		</svg>
-	{/if}
-</button>
 
 <!-- Mobile menu overlay -->
 {#if isOpen}
@@ -56,9 +31,9 @@
 
 <!-- Mobile menu panel -->
 <div
-	class="fixed right-0 top-0 z-50 h-full w-64 transform border-l border-gray-200 bg-white shadow-xl transition-transform duration-300 ease-in-out md:hidden dark:border-gray-700 dark:bg-gray-900 {isOpen
-		? 'translate-x-0'
-		: 'translate-x-full'}"
+	class="fixed right-0 top-0 z-50 h-full w-64 border-l border-gray-200 bg-white shadow-xl md:hidden dark:border-gray-700 dark:bg-gray-900
+		{isOpen ? 'translate-x-0' : 'translate-x-full'}
+		transition-transform duration-300 ease-in-out"
 >
 	<div class="flex h-full flex-col">
 		<!-- Header -->

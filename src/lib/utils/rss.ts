@@ -44,6 +44,18 @@ const parser = new XMLParser({
 	attributeNamePrefix: '@_'
 });
 
+function stripHtml(html: string): string {
+	return html
+		.replace(/<[^>]*>/g, '')
+		.replace(/&amp;/g, '&')
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'")
+		.replace(/\s+/g, ' ')
+		.trim();
+}
+
 function detectSource(url: string): ArticleSource {
 	if (url.includes('zenn.dev')) return 'zenn';
 	if (url.includes('note.com')) return 'note';
@@ -59,7 +71,7 @@ function parseRSSItems(xml: string, source: ArticleSource): Article[] {
 		title: item.title,
 		url: item.link,
 		publishedAt: item.pubDate,
-		description: item.description,
+		description: item.description ? stripHtml(item.description) : undefined,
 		thumbnail: item.enclosure?.['@_url'],
 		source
 	}));
