@@ -32,27 +32,46 @@ export const products: Product[] = [
 			'ダークモード対応'
 		],
 		privacy: {
-			effectiveDate: '2026-02-11',
-			dataCollection: 'minimal',
-			dataItems: ['読書記録データ（端末内保存）', 'AI対話履歴（端末内保存）'],
-			thirdPartyServices: ['OpenAI API（AI対話機能）'],
-			analyticsUsed: false,
+			effectiveDate: '2026-02-14',
+			dataCollection: 'standard',
+			dataItems: [
+				'アカウント情報（Google/Apple Sign-In）',
+				'読書記録・本棚データ（Firestore クラウド同期）',
+				'チャットメモ・AI対話履歴（Firestore クラウド同期）',
+				'プロフィール情報・アバター画像（Cloud Storage）',
+				'読書目標・アチーブメント（Firestore クラウド同期）',
+				'アプリ利用状況（Firebase Analytics）'
+			],
+			thirdPartyServices: [
+				'Firebase Authentication（ユーザー認証）',
+				'Cloud Firestore（データ保存・同期）',
+				'Cloud Storage for Firebase（画像保存）',
+				'Firebase Analytics（利用状況分析）',
+				'Claude API by Anthropic（AI対話機能）',
+				'Google Books API / OpenBD（書籍情報検索）',
+				'RevenueCat（サブスクリプション管理）'
+			],
+			analyticsUsed: true,
 			contactEmail: 'info@taniguchi-kyoichi.com'
 		},
 		support: {
 			contactEmail: 'info@taniguchi-kyoichi.com',
 			faq: [
 				{
-					question: 'データはクラウドに保存されますか？',
-					answer: '読書記録やメモはすべて端末内に保存されます。外部サーバーへのデータ送信は行いません。'
+					question: 'データはどこに保存されますか？',
+					answer: '読書記録やメモはFirebase（Google Cloud）上に安全に保存され、デバイス間で同期されます。アカウントにログインすれば、どのデバイスからでもデータにアクセスできます。'
 				},
 				{
-					question: 'AI機能にはインターネット接続が必要ですか？',
-					answer: 'AI対話機能を使用する場合のみインターネット接続が必要です。それ以外の機能はオフラインで利用できます。'
+					question: 'インターネット接続は必要ですか？',
+					answer: 'はい、ログインやデータの同期にインターネット接続が必要です。オフライン時もキャッシュされたデータの閲覧は可能ですが、新規登録や編集にはオンライン環境が必要です。'
 				},
 				{
-					question: 'アプリを削除するとデータは消えますか？',
-					answer: 'はい、アプリを削除するとすべてのデータが端末から削除されます。'
+					question: 'アカウントやデータを削除するには？',
+					answer: 'プロフィール画面の「アカウント削除」からアカウントと全データを完全に削除できます。この操作は取り消せません。'
+				},
+				{
+					question: '無料プランとプレミアムプランの違いは？',
+					answer: '無料プランでは月10冊まで登録可能です。プレミアムプラン（月額¥600 / 年額¥6,000）では登録冊数無制限で全機能をご利用いただけます。'
 				}
 			],
 			systemRequirements: 'iOS 17.0以上'
