@@ -120,6 +120,79 @@ export const products: Product[] = [
 			],
 			systemRequirements: 'iOS 17.0以上'
 		}
+	},
+	{
+		id: 'mindmap-ai',
+		name: 'マインドマップAI',
+		description:
+			'AIを活用した無限キャンバスのマインドマップアプリ。生成AIがアイデアを提案し、なぜなぜ分析で問題の根本原因を探ります。',
+		fullDescription:
+			'マインドマップAIは、創造的な思考と効率的なプランニングをサポートするアプリです。無限に広がるキャンバス上でマインドマップを作成でき、複数の生成AI（Claude、GPT-4、Gemini）がアイデアを提案します。なぜなぜ分析機能で問題の根本原因を深掘りでき、作成したマップは自動保存・外部ファイルへのエクスポートも可能です。',
+		type: 'app',
+		status: 'production',
+		platforms: ['ios', 'macos'],
+		links: {
+			appStore: 'https://apps.apple.com/jp/app/id6470609816'
+		},
+		technologies: ['Swift', 'SwiftUI', 'AI', 'Firebase'],
+		thumbnail: '/mindmap-ai-icon.jpg',
+		featured: true,
+		price: '無料（広告あり / アプリ内課金あり）',
+		category: '仕事効率化',
+		ageRating: '4+',
+		features: [
+			'無限キャンバスのマインドマップ作成',
+			'複数AIによるアイデア自動生成（Claude、GPT-4、Gemini）',
+			'なぜなぜ分析（根本原因分析）',
+			'自動保存・.mmaiファイルエクスポート',
+			'Google / Apple サインイン',
+			'クラウド同期（Firestore）',
+			'マルチプラットフォーム（iOS / macOS / visionOS）'
+		],
+		privacy: {
+			effectiveDate: '2026-02-14',
+			dataCollection: 'standard',
+			dataItems: [
+				'アカウント情報（Google/Apple Sign-In）',
+				'マインドマップデータ（Firestore クラウド同期）',
+				'AI生成履歴（サーバー経由、ログは保持しません）',
+				'広告表示のための識別子（AdMob）',
+				'アプリ利用状況（Firebase Analytics）'
+			],
+			thirdPartyServices: [
+				'Firebase Authentication（ユーザー認証）',
+				'Cloud Firestore（データ保存・同期）',
+				'Firebase Analytics（利用状況分析）',
+				'Google AdMob（広告配信）',
+				'Anthropic Claude API（AI生成 - サーバー経由）',
+				'OpenAI GPT-4 API（AI生成 - サーバー経由）',
+				'Google Gemini API（AI生成 - サーバー経由）'
+			],
+			analyticsUsed: true,
+			contactEmail: 'info@taniguchi-kyoichi.com'
+		},
+		support: {
+			contactEmail: 'info@taniguchi-kyoichi.com',
+			faq: [
+				{
+					question: 'データはどこに保存されますか？',
+					answer: 'マインドマップはFirebase（Google Cloud）上に安全に保存され、デバイス間で同期されます。また、.mmaiファイルとして端末にエクスポートすることも可能です。'
+				},
+				{
+					question: 'インターネット接続は必要ですか？',
+					answer: 'AI生成機能とクラウド同期にはインターネット接続が必要です。ローカルに保存済みのマップの閲覧・編集はオフラインでも可能です。'
+				},
+				{
+					question: 'AI生成機能はどのように動作しますか？',
+					answer: 'AI生成はサーバー側で処理されます。お客様のマインドマップの内容がAIに送信されますが、サーバーにログとして保存されることはありません。'
+				},
+				{
+					question: 'データを削除するには？',
+					answer: 'アカウント設定からアカウントと全データを完全に削除できます。この操作は取り消せません。'
+				}
+			],
+			systemRequirements: 'iOS 18.0以上 / macOS 15.0以上'
+		}
 	}
 ];
 
