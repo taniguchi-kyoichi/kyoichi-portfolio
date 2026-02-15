@@ -193,6 +193,79 @@ export const products: Product[] = [
 			],
 			systemRequirements: 'iOS 18.0以上 / macOS 15.0以上'
 		}
+	},
+	{
+		id: 'digital-detox',
+		name: 'デジタルデトックス',
+		description:
+			'スマホをやめた後、何をすればいいかをAIが提案するデジタルウェルネスアプリ。呼吸介入で無意識の習慣ループに気づきを促し、AI代替活動レコメンドで行動変容を支援します。',
+		fullDescription:
+			'デジタルデトックスは、行動科学に基づいたデジタルウェルネスアプリです。SNS起動前に呼吸アニメーションを表示し、無意識の習慣ループに気づきを促します。「やめる」を選択すると、時間帯・興味・過去の評価に基づいてAIが代替活動を3択で提案。節約時間やキャンセル率をダッシュボードで可視化し、継続のモチベーションを維持します。',
+		type: 'app',
+		status: 'development',
+		platforms: ['ios'],
+		links: {},
+		technologies: ['Swift', 'SwiftUI', 'AI', 'Firebase', 'HealthKit'],
+		thumbnail: '/digital-detox-icon.jpg',
+		featured: true,
+		price: '無料（アプリ内課金あり）',
+		category: 'ヘルスケア/フィットネス',
+		ageRating: '4+',
+		features: [
+			'呼吸介入（5秒アニメーション + やめる/開く選択）',
+			'AI代替活動レコメンド（時間帯・興味に応じた3択提案）',
+			'節約時間・キャンセル率のダッシュボード表示',
+			'使用パターン通知（キリ番での気づき促進）',
+			'HealthKit連携（歩数データ活用）',
+			'Shortcuts連携（自動介入トリガー）'
+		],
+		privacy: {
+			effectiveDate: '2026-02-15',
+			dataCollection: 'standard',
+			dataItems: [
+				'アカウント情報（Apple Sign-In）',
+				'介入セッション記録（Firestore クラウド同期）',
+				'興味カテゴリ・設定情報（Firestore クラウド同期）',
+				'ヘルスケアデータ（HealthKit経由の歩数データ ※端末内処理のみ）',
+				'アプリ利用状況（Firebase Analytics）'
+			],
+			thirdPartyServices: [
+				'Firebase Authentication（ユーザー認証）',
+				'Cloud Firestore（データ保存・同期）',
+				'Firebase Analytics（利用状況分析）',
+				'Claude API by Anthropic（AI代替活動レコメンド - サーバー経由）',
+				'RevenueCat（サブスクリプション管理）',
+				'Apple HealthKit（歩数データ取得 ※外部送信なし）'
+			],
+			analyticsUsed: true,
+			contactEmail: 'info@taniguchi-kyoichi.com'
+		},
+		support: {
+			contactEmail: 'info@taniguchi-kyoichi.com',
+			faq: [
+				{
+					question: 'どうやってSNSアプリの起動を検知するのですか？',
+					answer:
+						'iOSのショートカットアプリと連携して動作します。オンボーディングで設定ガイドを案内しますので、指定のオートメーションを作成してください。'
+				},
+				{
+					question: 'データはどこに保存されますか？',
+					answer:
+						'介入セッションの記録や設定はFirebase（Google Cloud）上に安全に保存され、デバイス間で同期されます。HealthKitのデータは端末内でのみ処理され、外部サーバーには送信されません。'
+				},
+				{
+					question: 'インターネット接続は必要ですか？',
+					answer:
+						'呼吸介入はオフラインでも動作します。AIレコメンドにはインターネット接続が必要ですが、オフライン時はローカルの定型レコメンドが表示されます。'
+				},
+				{
+					question: '無料プランとプレミアムプランの違いは？',
+					answer:
+						'無料プランではAIレコメンドが1日3回まで、ダッシュボードは当日分のみ表示されます。プレミアムプランではAIレコメンド無制限、週次/月次トレンドの分析が利用可能です。'
+				}
+			],
+			systemRequirements: 'iOS 17.0以上'
+		}
 	}
 ];
 
