@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, useState, type RefObject, type MouseEvent as ReactMouseEvent } from 'react'
 import MarkdownIt from 'markdown-it'
 import { search, facets, getDoc, related, list, home, board, artifacts, type Hit, type Doc, type Mode, type HomeData, type BoardBrief, type BoardItem, type Artifact } from './api'
 import { Home } from './Home'
@@ -66,6 +66,21 @@ export function App() {
   function goStatus(s: string) { setStatus(s); setCategory(undefined); setQ(''); setView('docs') }
   async function openDoc(path: string) { setRel([]); setSel(await getDoc(path)); related(path).then(setRel) }
 
+  // 本文中の内部リンク（相対 .md / [[wiki]]）をアプリ内ナビゲーションに。失敗時は検索へフォールバック。
+  async function onBodyClick(e: ReactMouseEvent) {
+    const a = (e.target as HTMLElement).closest('a')
+    if (!a) return
+    const href = a.getAttribute('href') || ''
+    if (href.startsWith('wiki:')) {
+      e.preventDefault(); setSel(null); setQ(decodeURIComponent(href.slice(5))); setView('docs'); return
+    }
+    if (/^(https?:|mailto:|#)/i.test(href) || !/\.md(#|$)/.test(href)) return // 外部/アンカーはそのまま
+    e.preventDefault()
+    const path = resolvePath(sel?.path ?? '', href.split('#')[0])
+    try { const d = await getDoc(path); setRel([]); setSel(d); related(path).then(setRel) }
+    catch { setSel(null); setQ(path.split('/').pop()?.replace(/\.md$/, '') ?? ''); setView('docs') }
+  }
+
   const [refreshing, setRefreshing] = useState(false)
   async function refresh() {
     setRefreshing(true)
@@ -78,7 +93,10 @@ export function App() {
     } finally { setRefreshing(false) }
   }
 
-  const bodyHtml = useMemo(() => (sel ? md.render(sel.body) : ''), [sel])
+  // [[wiki]] を wiki: リンクに変換してから描画（内部ナビの対象にする）
+  const bodyHtml = useMemo(() =>
+    sel ? md.render(sel.body.replace(/\[\[([^\]]+)\]\]/g, (_, n) => `[${n}](wiki:${encodeURIComponent(n)})`)) : '',
+    [sel])
   const NAV: { v: View; label: string; ic: string }[] = [
     { v: 'home', label: 'ホーム', ic: '🏠' },
     { v: 'docs', label: '記録', ic: '📄' },
@@ -147,7 +165,7 @@ export function App() {
                 {sel.created && <span>· {sel.created}</span>}
                 <span className="faint">· {sel.path}</span>
               </div>
-              <article className="md" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+              <article className="md" onClick={onBodyClick} dangerouslySetInnerHTML={{ __html: bodyHtml }} />
               {rel.length > 0 && (
                 <aside className="related">
                   <div className="overline">関連する記録</div>
@@ -190,6 +208,10 @@ function DocsView(p: {
 }) {
   return (
     <div className="collection">
+      <div className="collection-head">
+        <h1>記録</h1>
+        <span className="count">{p.loading ? '…' : `${p.hits.length} 件`}</span>
+      </div>
       <div className="search-bar">
         <input ref={p.inputRef} className="search-input" value={p.q} placeholder="記録を検索"
           onChange={(e) => p.setQ(e.target.value)} autoFocus />
@@ -289,6 +311,18 @@ function ArtifactsView({ arts, onOpen }: { arts: Artifact[] | null; onOpen: (a: 
       ))}
     </div>
   )
+}
+
+/** 本文リンクの href を repo 相対パスへ解決。'.'始まりは base ディレクトリ基準、それ以外は repo ルート基準。 */
+function resolvePath(base: string, href: string): string {
+  const baseDir = base.includes('/') ? base.slice(0, base.lastIndexOf('/')) : ''
+  const parts = href.startsWith('.') ? baseDir.split('/').filter(Boolean) : []
+  for (const seg of href.split('/')) {
+    if (seg === '' || seg === '.') continue
+    if (seg === '..') parts.pop()
+    else parts.push(seg)
+  }
+  return parts.join('/')
 }
 
 function escapeSnippet(s: string): string {
