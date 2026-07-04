@@ -17,6 +17,8 @@ export const search = (q: string, mode: Mode, category?: string, limit = 40): Pr
 export const facets = (): Promise<Facets> => j('/api/facets')
 export const getDoc = (path: string): Promise<Doc> => j(`/api/doc?${qs({ path })}`)
 export const related = (path: string): Promise<Hit[]> => j(`/api/related?${qs({ path })}`)
+export interface Heading { level: number; text: string; ord: number }
+export const outline = (path: string): Promise<Heading[]> => j(`/api/outline?${qs({ path })}`)
 export const list = (category?: string, status?: string, limit = 60): Promise<Hit[]> =>
   j(`/api/list?${qs({ category, status, limit })}`)
 

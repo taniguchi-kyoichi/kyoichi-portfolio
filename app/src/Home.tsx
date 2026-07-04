@@ -1,8 +1,8 @@
-import type { HomeData, BoardBrief, BoardItem } from './api'
-import { ObjectRow } from './components'
+import type { HomeData, BoardBrief } from './api'
+import { ObjectRow, TaskRow, fmtDate } from './components'
 
 const WD = ['日', '月', '火', '水', '木', '金', '土']
-function fmtDate(s: string): string {
+function fmtDay(s: string): string {
   const d = new Date(s + 'T00:00:00')
   return `${Number(s.slice(5, 7))}月${Number(s.slice(8, 10))}日 (${WD[d.getDay()]})`
 }
@@ -26,7 +26,6 @@ export function Home({ data, board, onStatus, onOpen, onTasks }: {
   const loopGap = loop.daysSinceDay
   const loopDrift = loopGap != null && loopGap >= 2
 
-  // 一文の状態（ダッシュボードでなく物語）
   const stateLine = loopDrift
     ? `日次が ${ago(loopGap)}。今夜ひと touch で戻せる。`
     : weekly.due || weekly.last == null
@@ -36,10 +35,10 @@ export function Home({ data, board, onStatus, onOpen, onTasks }: {
   return (
     <div className="home">
       <div className="home-head">
-        <div className="home-date">{fmtDate(data.today)}</div>
+        <div className="home-date">{fmtDay(data.today)}</div>
         <div className="home-state">{stateLine}</div>
         <div className="home-fresh">
-          board <b>ライブ</b>
+          タスク <b>ライブ</b>
           {index.lastIngest && <> · 索引 <b>{ago(index.daysSince)}</b></>}
           {index.daysSince != null && index.daysSince >= 7 && <span className="stale"> · 索引が古い</span>}
         </div>
@@ -55,35 +54,37 @@ export function Home({ data, board, onStatus, onOpen, onTasks }: {
           {intent.livingInterests.length > 0 && (
             <div className="kv">
               <span className="k">今の関心</span>
-              <ul style={{ paddingLeft: 18 }}>
+              <ul className="bullet">
                 {intent.livingInterests.slice(0, 4).map((t, i) => <li key={i}>{t}</li>)}
               </ul>
             </div>
           )}
         </section>
 
-        {/* 今の進行（タスクへの入口） */}
-        {board && (
-          <section className={`card span-2 ${board.wip > board.wipLimit || board.stale.length ? 'attn' : ''}`}>
-            <div className="card-head">
-              <div className="overline">今の進行</div>
-              <button className="link" onClick={onTasks}>タスクをすべて →</button>
+        {/* 今の進行（タスクへの入口）— board 未接続でも導線は残す */}
+        <section className={`card span-2 ${board && (board.wip > board.wipLimit || board.stale.length) ? 'attn' : ''}`}>
+          <div className="card-head">
+            <div className="overline">今の進行</div>
+            <button className="link" onClick={onTasks}>タスクをすべて →</button>
+          </div>
+          {board == null ? (
+            <p className="muted">タスクボードにまだ接続されていません。</p>
+          ) : board.inProgress.length ? (
+            <div className="mini-list">
+              {board.inProgress.map((it, i) => <TaskRow key={i} it={it} status="in-progress" />)}
             </div>
-            {board.inProgress.length ? (
-              <div className="mini-list">
-                {board.inProgress.map((it, i) => <BoardMini key={i} it={it} status="in-progress" />)}
-              </div>
-            ) : (
-              <p className="muted">アクティブは無し。次を <b>Ready</b> から引くタイミング。</p>
-            )}
+          ) : (
+            <p className="muted">いま動かしているものは無し。次を <b>「次に引ける」</b> から引くタイミング。</p>
+          )}
+          {board && (
             <div className="count-row">
-              <span className={board.wip > board.wipLimit ? 'over' : ''}>WIP <b>{board.wip}/{board.wipLimit}</b></span>
-              <span>Ready <b>{board.counts.ready}</b></span>
-              <span>Blocked <b>{board.counts.blocked}</b></span>
-              <span>Backlog <b>{board.counts.backlog}</b></span>
+              <span className={board.wip > board.wipLimit ? 'over' : ''}>いま <b>{board.wip}/{board.wipLimit}</b></span>
+              <span>次に引ける <b>{board.counts.ready}</b></span>
+              <span>止まっている <b>{board.counts.blocked}</b></span>
+              <span>未整理 <b>{board.counts.backlog}</b></span>
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
         {/* リズム（日次+週次を1群に＝近接） */}
         <section className="card">
@@ -133,7 +134,7 @@ export function Home({ data, board, onStatus, onOpen, onTasks }: {
             ))}
           </div>
           {trajectory.stale && (
-            <div className="faint" style={{ fontSize: 'var(--t-xs)' }}>
+            <div className="faint fs-xs">
               value-trajectory 陳腐化（更新 {ago(trajectory.daysSince)}）
             </div>
           )}
@@ -145,7 +146,7 @@ export function Home({ data, board, onStatus, onOpen, onTasks }: {
           <div className="mini-list">
             {recent.map((r) => (
               <ObjectRow key={r.path} title={r.title}
-                meta={<span>{r.category}{r.created ? ` · ${r.created}` : ''}</span>}
+                meta={<span>{r.category}{r.created ? ` · ${fmtDate(r.created)}` : ''}</span>}
                 onClick={() => onOpen(r.path)} />
             ))}
           </div>
@@ -153,9 +154,4 @@ export function Home({ data, board, onStatus, onOpen, onTasks }: {
       </div>
     </div>
   )
-}
-
-function BoardMini({ it, status }: { it: BoardItem; status: string }) {
-  const repo = it.repo ? it.repo.replace(/^no-problem-dev\//, '').replace(/^taniguchi-kyoichi\//, '') : '下書き'
-  return <ObjectRow title={it.title} status={status} meta={<span>{repo}</span>} href={it.url ?? undefined} onClick={it.url ? undefined : () => {}} />
 }
