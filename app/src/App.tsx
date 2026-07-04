@@ -1,71 +1,77 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import MarkdownIt from 'markdown-it'
-import { search, facets, getDoc, related, list, home, board, artifacts, type Hit, type Doc, type Mode, type HomeData, type BoardBrief, type Artifact } from './api'
+import { search, facets, getDoc, related, list, home, board, artifacts, type Hit, type Doc, type Mode, type HomeData, type BoardBrief, type BoardItem, type Artifact } from './api'
 import { Home } from './Home'
+import { ObjectRow, StatusBadge } from './components'
 
 const md = new MarkdownIt({ html: false, linkify: true, breaks: false })
+type View = 'home' | 'docs' | 'tasks' | 'artifacts'
+
+const WD = ['日', '月', '火', '水', '木', '金', '土']
+function fmtToday(s: string): string {
+  const d = new Date(s + 'T00:00:00')
+  return `${s.slice(5)} (${WD[d.getDay()]})`
+}
 
 export function App() {
+  const [view, setView] = useState<View>('home')
+
+  const [homeData, setHomeData] = useState<HomeData | null>(null)
+  const [boardData, setBoardData] = useState<BoardBrief | null>(null)
+  const [cats, setCats] = useState<{ category: string; n: number }[]>([])
+  const [statuses, setStatuses] = useState<{ status: string; n: number }[]>([])
+  const [total, setTotal] = useState(0)
+  const [arts, setArts] = useState<Artifact[] | null>(null)
+
   const [q, setQ] = useState('')
   const [mode, setMode] = useState<Mode>('hybrid')
   const [category, setCategory] = useState<string | undefined>()
-  const [cats, setCats] = useState<{ category: string; n: number }[]>([])
   const [status, setStatus] = useState<string | undefined>()
-  const [statuses, setStatuses] = useState<{ status: string; n: number }[]>([])
-  const [total, setTotal] = useState(0)
   const [hits, setHits] = useState<Hit[]>([])
+  const [loading, setLoading] = useState(false)
+  const [showDetail, setShowDetail] = useState(false)
+
   const [sel, setSel] = useState<Doc | null>(null)
   const [rel, setRel] = useState<Hit[]>([])
-  const [loading, setLoading] = useState(false)
-  const [homeData, setHomeData] = useState<HomeData | null>(null)
-  const [boardData, setBoardData] = useState<BoardBrief | null>(null)
-  const [tab, setTab] = useState<'index' | 'artifacts'>('index')
-  const [arts, setArts] = useState<Artifact[] | null>(null)
-  const [artSel, setArtSel] = useState<string | null>(null)
+  const [artSel, setArtSel] = useState<Artifact | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { facets().then((f) => { setCats(f.byCategory); setStatuses(f.byStatus); setTotal(f.total) }) }, [])
-  useEffect(() => { home().then(setHomeData) }, [])
-  useEffect(() => { board().then(setBoardData) }, [])
-  useEffect(() => { if (tab === 'artifacts' && arts == null) artifacts().then(setArts) }, [tab, arts])
-
-  // アイドル（無検索・無フィルタ・未選択）は Home（状態の鏡）を表示
-  const showHome = !q.trim() && !category && !status && !sel && homeData != null
-
-  // 検索（デバウンス）。空クエリは category/status の新着一覧。status 絞り込みは一覧のみ。
   useEffect(() => {
+    facets().then((f) => { setCats(f.byCategory); setStatuses(f.byStatus); setTotal(f.total) })
+    home().then(setHomeData)
+    board().then(setBoardData)
+  }, [])
+  useEffect(() => { if (view === 'artifacts' && arts == null) artifacts().then(setArts) }, [view, arts])
+
+  useEffect(() => {
+    if (view !== 'docs') return
     const t = setTimeout(async () => {
       setLoading(true)
       try { setHits(q.trim() ? await search(q, mode, category) : await list(category, status)) }
       finally { setLoading(false) }
     }, 180)
     return () => clearTimeout(t)
-  }, [q, mode, category, status])
+  }, [q, mode, category, status, view])
 
-  // キーボード: "/" で検索へフォーカス
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
-      if (e.key === '/' && document.activeElement !== inputRef.current) { e.preventDefault(); inputRef.current?.focus() }
-      if (e.key === 'Escape') { setSel(null); inputRef.current?.focus() }
+      if (e.key === '/' && document.activeElement !== inputRef.current) { e.preventDefault(); goDocs() }
+      if (e.key === 'Escape') { setSel(null); setArtSel(null) }
     }
     window.addEventListener('keydown', h)
-    inputRef.current?.focus()
     return () => window.removeEventListener('keydown', h)
   }, [])
 
-  async function open(path: string) {
-    setSel(await getDoc(path)); setRel([])
-    related(path).then(setRel)
-  }
+  function goDocs() { setView('docs'); setTimeout(() => inputRef.current?.focus(), 30) }
+  function goStatus(s: string) { setStatus(s); setCategory(undefined); setQ(''); setView('docs') }
+  async function openDoc(path: string) { setRel([]); setSel(await getDoc(path)); related(path).then(setRel) }
 
   const [refreshing, setRefreshing] = useState(false)
   async function refresh() {
-    // ライブ view を再取得（board は GitHub からライブ / home・成果物 は最新 ingest を反映）。
     setRefreshing(true)
     try {
       await Promise.all([
-        home().then(setHomeData),
-        board().then(setBoardData),
+        home().then(setHomeData), board().then(setBoardData),
         facets().then((f) => { setCats(f.byCategory); setStatuses(f.byStatus); setTotal(f.total) }),
         artifacts().then(setArts),
       ])
@@ -73,138 +79,218 @@ export function App() {
   }
 
   const bodyHtml = useMemo(() => (sel ? md.render(sel.body) : ''), [sel])
+  const NAV: { v: View; label: string; ic: string }[] = [
+    { v: 'home', label: 'ホーム', ic: '🏠' },
+    { v: 'docs', label: '記録', ic: '📄' },
+    { v: 'tasks', label: 'タスク', ic: '✓' },
+    { v: 'artifacts', label: '成果物', ic: '▤' },
+  ]
 
   return (
     <div className="app">
-      <header>
-        <div className="brand">life-index <span className="muted">{total} docs</span></div>
-        <input
-          ref={inputRef} className="search" value={q} placeholder="検索  ( / でフォーカス )"
-          onChange={(e) => setQ(e.target.value)} autoFocus
-        />
-        <div className="modes">
-          {(['hybrid', 'fts', 'semantic'] as Mode[]).map((m) => (
-            <button key={m} className={m === mode ? 'on' : ''} onClick={() => setMode(m)}>{m}</button>
-          ))}
-        </div>
-        <div className="tabs">
-          <button className={tab === 'index' ? 'on' : ''} onClick={() => setTab('index')}>索引</button>
-          <button className={tab === 'artifacts' ? 'on' : ''} onClick={() => setTab('artifacts')}>成果物{arts ? ` ${arts.length}` : ''}</button>
-        </div>
-        <button className="refresh" onClick={refresh} disabled={refreshing} title="ライブ view を再取得（board はライブ）">
-          {refreshing ? '更新中…' : '🔄 更新'}
-        </button>
-      </header>
-
-      <div className="cols">
-        {tab === 'artifacts' ? (
-          <ArtifactsView arts={arts} sel={artSel} onSel={setArtSel} />
-        ) : (
-        <>
-        <nav className="facets">
-          <div className="facet-label">状態{q.trim() && <span className="muted"> (一覧のみ)</span>}</div>
-          <div className="facet-status">
-            <button className={!status ? 'on' : ''} onClick={() => setStatus(undefined)}>all</button>
-            {statuses.filter((s) => s.status !== '(none)').map((s) => (
-              <button key={s.status} className={status === s.status ? 'on' : ''} onClick={() => setStatus(s.status)}>
-                {s.status} <span>{s.n}</span>
-              </button>
-            ))}
-          </div>
-          <div className="facet-label">カテゴリ</div>
-          <button className={!category ? 'on' : ''} onClick={() => setCategory(undefined)}>すべて <span>{total}</span></button>
-          {cats.map((c) => (
-            <button key={c.category} className={category === c.category ? 'on' : ''} onClick={() => setCategory(c.category)}>
-              {c.category} <span>{c.n}</span>
+      <header className="topbar">
+        <span className="brand">Life</span>
+        {homeData && <span className="today">{fmtToday(homeData.today)}</span>}
+        <span className="spacer" />
+        <nav className="top-nav">
+          {NAV.map((n) => (
+            <button key={n.v} className={view === n.v ? 'on' : ''} onClick={() => setView(n.v)}>
+              {n.label}{n.v === 'artifacts' && arts ? ` ${arts.length}` : ''}
             </button>
           ))}
         </nav>
+        <button className="icon-btn" onClick={refresh} disabled={refreshing} title="最新の状態に更新（board はライブ）">
+          {refreshing ? '更新中…' : '↻'}
+        </button>
+      </header>
 
-        {showHome ? (
-          <Home data={homeData!} board={boardData} onStatus={setStatus} onOpen={open} />
-        ) : (
+      <main className="stage">
+        {view === 'home' && (homeData
+          ? <Home data={homeData} board={boardData} onStatus={goStatus} onOpen={openDoc} onTasks={() => setView('tasks')} />
+          : <div className="loading">…</div>)}
+
+        {view === 'docs' && (
+          <DocsView
+            q={q} setQ={setQ} inputRef={inputRef}
+            cats={cats} statuses={statuses} total={total}
+            category={category} setCategory={setCategory} status={status} setStatus={setStatus}
+            mode={mode} setMode={setMode} showDetail={showDetail} setShowDetail={setShowDetail}
+            hits={hits} loading={loading} sel={sel} onOpen={openDoc}
+          />
+        )}
+
+        {view === 'tasks' && <TasksView board={boardData} />}
+
+        {view === 'artifacts' && <ArtifactsView arts={arts} onOpen={setArtSel} />}
+      </main>
+
+      <nav className="bottom-nav">
+        {NAV.map((n) => (
+          <button key={n.v} className={view === n.v ? 'on' : ''} onClick={() => n.v === 'docs' ? goDocs() : setView(n.v)}>
+            <span className="ic">{n.ic}</span>{n.label}
+          </button>
+        ))}
+      </nav>
+
+      {sel && (
         <>
-        <ul className="results">
-          {loading && <li className="dim">…</li>}
-          {!loading && hits.length === 0 && <li className="dim">該当なし</li>}
-          {hits.map((h) => (
-            <li key={h.path} className={sel?.path === h.path ? 'sel' : ''} onClick={() => open(h.path)}>
-              <div className="t">{h.title}</div>
-              <div className="m">
-                {h.status && <span className={`badge st-${h.status}`}>{h.status}</span>}
-                {h.category} {h.created ? `· ${h.created}` : ''} {h.distance != null ? `· d=${h.distance.toFixed(3)}` : ''}
-              </div>
-              {h.snippet && <div className="s" dangerouslySetInnerHTML={{ __html: escapeSnippet(h.snippet) }} />}
-            </li>
-          ))}
-        </ul>
-
-        <main className="reader">
-          {!sel && <div className="dim center">左の結果を選択</div>}
-          {sel && (
-            <>
-              <div className="doc-head">
-                <h1>{sel.title}</h1>
-                <div className="m">{sel.path}</div>
+          <div className="backdrop" onClick={() => setSel(null)} />
+          <div className="sheet">
+            <div className="sheet-head">
+              <button className="close" onClick={() => setSel(null)} title="閉じる">✕</button>
+              <span className="h">{sel.title}</span>
+            </div>
+            <div className="sheet-body">
+              <div className="meta-line">
+                {sel.frontmatter?.status && <StatusBadge status={sel.frontmatter.status} />}
+                <span>{sel.category}</span>
+                {sel.created && <span>· {sel.created}</span>}
+                <span className="faint">· {sel.path}</span>
               </div>
               <article className="md" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
               {rel.length > 0 && (
                 <aside className="related">
-                  <h3>意味的に近い文書</h3>
+                  <div className="overline">関連する記録</div>
                   {rel.map((r) => (
-                    <button key={r.path} onClick={() => open(r.path)}>
-                      <span className="t">{r.title}</span>
-                      <span className="m">{r.category} {r.distance != null ? `· d=${r.distance.toFixed(3)}` : ''}</span>
-                    </button>
+                    <ObjectRow key={r.path} title={r.title} status={r.status}
+                      meta={<span>{r.category}</span>} onClick={() => openDoc(r.path)} />
                   ))}
                 </aside>
               )}
-            </>
-          )}
-        </main>
+            </div>
+          </div>
         </>
-        )}
+      )}
+
+      {artSel && (
+        <>
+          <div className="backdrop" onClick={() => setArtSel(null)} />
+          <div className="sheet">
+            <div className="sheet-head">
+              <button className="close" onClick={() => setArtSel(null)} title="閉じる">✕</button>
+              <span className="h">{artSel.title}</span>
+            </div>
+            <iframe className="art-frame" title={artSel.path}
+              src={`/api/artifact?path=${encodeURIComponent(artSel.path)}`}
+              sandbox="allow-scripts allow-popups allow-downloads" />
+          </div>
         </>
-        )}
-      </div>
+      )}
     </div>
   )
 }
 
-function ArtifactsView({ arts, sel, onSel }: {
-  arts: Artifact[] | null
-  sel: string | null
-  onSel: (path: string) => void
+function DocsView(p: {
+  q: string; setQ: (s: string) => void; inputRef: RefObject<HTMLInputElement>
+  cats: { category: string; n: number }[]; statuses: { status: string; n: number }[]; total: number
+  category?: string; setCategory: (s: string | undefined) => void
+  status?: string; setStatus: (s: string | undefined) => void
+  mode: Mode; setMode: (m: Mode) => void; showDetail: boolean; setShowDetail: (b: boolean) => void
+  hits: Hit[]; loading: boolean; sel: Doc | null; onOpen: (path: string) => void
 }) {
-  if (arts == null) return <div className="art-list dim">…</div>
   return (
-    <>
-      <nav className="facets art-list">
-        <div className="facet-label">成果物 <span>{arts.length}</span></div>
-        {arts.length === 0 && <div className="dim" style={{ padding: '8px 4px', fontSize: 12 }}>まだありません。<br />スキルが自己完結 HTML を吐き、ingest で載ります。</div>}
-        {arts.map((a) => (
-          <button key={a.path} className={`art-item ${sel === a.path ? 'on' : ''}`} onClick={() => onSel(a.path)}>
-            <span className="at">{a.title}</span>
-            <span className="am">{a.theme}{a.created ? ` · ${a.created}` : ''}</span>
-          </button>
-        ))}
-      </nav>
-      <main className="art-stage">
-        {sel ? (
-          <iframe
-            key={sel} className="art-frame" title={sel}
-            src={`/api/artifact?path=${encodeURIComponent(sel)}`}
-            sandbox="allow-scripts allow-popups allow-downloads"
-          />
-        ) : (
-          <div className="dim center">成果物を選択（HTML をそのまま端末横断で表示）</div>
-        )}
-      </main>
-    </>
+    <div className="collection">
+      <div className="search-bar">
+        <input ref={p.inputRef} className="search-input" value={p.q} placeholder="記録を検索"
+          onChange={(e) => p.setQ(e.target.value)} autoFocus />
+        <div className="filters">
+          <button className={`filter-chip ${!p.category && !p.status ? 'on' : ''}`}
+            onClick={() => { p.setCategory(undefined); p.setStatus(undefined) }}>すべて <span className="n">{p.total}</span></button>
+          {p.statuses.filter((s) => s.status !== '(none)').map((s) => (
+            <button key={s.status} className={`filter-chip ${p.status === s.status ? 'on' : ''}`}
+              onClick={() => p.setStatus(p.status === s.status ? undefined : s.status)}>
+              {s.status} <span className="n">{s.n}</span></button>
+          ))}
+          {p.cats.map((c) => (
+            <button key={c.category} className={`filter-chip ${p.category === c.category ? 'on' : ''}`}
+              onClick={() => p.setCategory(p.category === c.category ? undefined : c.category)}>
+              {c.category} <span className="n">{c.n}</span></button>
+          ))}
+        </div>
+        <div className="detail-toggle">
+          <button className="icon-btn" style={{ height: 26 }} onClick={() => p.setShowDetail(!p.showDetail)}>
+            {p.showDetail ? '詳細を隠す' : '詳細'}</button>
+          {p.showDetail && (
+            <span className="seg">
+              {(['hybrid', 'fts', 'semantic'] as Mode[]).map((m) => (
+                <button key={m} className={m === p.mode ? 'on' : ''} onClick={() => p.setMode(m)}>{m}</button>
+              ))}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {p.loading && <div className="loading">…</div>}
+      {!p.loading && p.hits.length === 0 && <div className="loading">該当なし</div>}
+      {p.hits.map((h) => (
+        <ObjectRow key={h.path} title={h.title} status={h.status} selected={p.sel?.path === h.path}
+          snippet={h.snippet ? escapeSnippet(h.snippet) : undefined}
+          onClick={() => p.onOpen(h.path)}
+          meta={<>
+            {h.status && <StatusBadge status={h.status} />}
+            <span>{h.category}</span>
+            {h.created && <span>· {h.created}</span>}
+            {p.showDetail && h.distance != null && <span className="faint">· d={h.distance.toFixed(3)}</span>}
+          </>} />
+      ))}
+    </div>
   )
 }
 
-// FTS snippet の ⟦ ⟧ をハイライトに（他はエスケープ）
+function TaskRow({ it, status }: { it: BoardItem; status: string }) {
+  const repo = it.repo ? it.repo.replace(/^no-problem-dev\//, '').replace(/^taniguchi-kyoichi\//, '') : '下書き'
+  return <ObjectRow title={it.title} status={status} meta={<span>{repo}</span>}
+    href={it.url ?? undefined} onClick={it.url ? undefined : () => {}} />
+}
+
+function TasksView({ board }: { board: BoardBrief | null }) {
+  if (board == null) return <div className="loading">board は未接続</div>
+  const { counts, wip, wipLimit } = board
+  const groups: { label: string; note?: string; items: BoardItem[]; status: string }[] = [
+    { label: 'いま回している', items: board.inProgress, status: 'in-progress' },
+    { label: '承認待ち', note: 'あなたの確認で Done に進む', items: board.inReview, status: 'in-progress' },
+    { label: '次に引ける', items: board.ready, status: 'inbox' },
+  ]
+  return (
+    <div>
+      <div className="collection-head"><h1>タスク</h1><span className="count">board #2</span></div>
+      {groups.map((g) => g.items.length > 0 && (
+        <div key={g.label} className="task-group">
+          <div className="overline">{g.label}<span className="n"> {g.items.length}</span>{g.note && <span className="muted" style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}> — {g.note}</span>}</div>
+          {g.items.map((it, i) => <TaskRow key={i} it={it} status={g.status} />)}
+        </div>
+      ))}
+      {board.inProgress.length === 0 && board.ready.length > 0 && (
+        <p className="muted" style={{ marginTop: 'var(--s3)' }}>アクティブは無し。次を <b>Ready</b> から引くタイミング。</p>
+      )}
+      <div className="count-row" style={{ marginTop: 'var(--s6)' }}>
+        <span className={wip > wipLimit ? 'over' : ''}>WIP <b>{wip}/{wipLimit}</b></span>
+        <span>Ready <b>{counts.ready}</b></span>
+        <span>Blocked <b>{counts.blocked}</b></span>
+        <span>Backlog <b>{counts.backlog}</b></span>
+      </div>
+      {board.stale.length > 0 && (
+        <p className="faint" style={{ marginTop: 'var(--s3)', fontSize: 'var(--t-xs)' }}>
+          ⚠ CLOSED なのに列に残る {board.stale.length} 件 — board 掃除の合図</p>
+      )}
+    </div>
+  )
+}
+
+function ArtifactsView({ arts, onOpen }: { arts: Artifact[] | null; onOpen: (a: Artifact) => void }) {
+  if (arts == null) return <div className="loading">…</div>
+  return (
+    <div className="collection">
+      <div className="collection-head"><h1>成果物</h1><span className="count">{arts.length}</span></div>
+      {arts.length === 0 && <p className="muted">まだありません。スキルが自己完結 HTML を吐き、ingest で載ります。</p>}
+      {arts.map((a) => (
+        <ObjectRow key={a.path} title={a.title} status="done" onClick={() => onOpen(a)}
+          meta={<span>{a.theme}{a.created ? ` · ${a.created}` : ''}</span>} />
+      ))}
+    </div>
+  )
+}
+
 function escapeSnippet(s: string): string {
   const esc = s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!))
   return esc.replace(/⟦/g, '<mark>').replace(/⟧/g, '</mark>')
