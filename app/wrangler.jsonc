@@ -8,7 +8,10 @@
   "assets": {
     "directory": "dist",
     "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // /api/* は必ず Worker を先に通す。これが無いと SPA フォールバックが html ナビ要求
+    // （成果物 iframe 等）を横取りして index.html を返してしまう（成果物にホームが出る不具合）。
+    "run_worker_first": ["/api/*"]
   },
   "services": [
     { "binding": "API", "service": "cloud-hub-api" }
