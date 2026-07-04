@@ -183,7 +183,7 @@ export function App() {
       {artSel && (
         <>
           <div className="backdrop" onClick={() => setArtSel(null)} />
-          <div className="sheet">
+          <div className="sheet sheet-full">
             <div className="sheet-head">
               <button className="close" onClick={() => setArtSel(null)} title="閉じる">✕</button>
               <span className="h">{artSel.title}</span>

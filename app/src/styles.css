@@ -315,9 +315,9 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; border-radius: 2
   .top-nav button { padding: var(--s1) var(--s4); border: none; background: none; color: var(--text-dim);
     cursor: pointer; font-size: var(--t-sm); border-radius: var(--r-full); }
   .top-nav button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-1); }
-  .sheet { left: auto; right: 0; width: min(620px, 92vw); border-left: 1px solid var(--border);
-    box-shadow: var(--shadow-2); transform: translateX(2%); }
-  @keyframes sheet-in { to { transform: translateX(0); opacity: 1; } }
+  /* 文書の閲覧は右ドック（本文を横に並べて読む）。成果物は独立ページなので全画面のまま。 */
+  .sheet:not(.sheet-full) { left: auto; right: 0; width: min(620px, 92vw);
+    border-left: 1px solid var(--border); box-shadow: var(--shadow-2); }
 }
 @media (min-width: 1060px) {
   .home-cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); align-items: start; }
