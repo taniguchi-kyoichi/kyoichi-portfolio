@@ -115,6 +115,17 @@ function splitBySize(text: string, max = 1500): string[] {
   return parts
 }
 
+/** frontmatter の created を YYYY-MM-DD へ正規化。YAML が Date に解釈した値や full timestamp も揃える。 */
+function toISODate(v: unknown): string {
+  if (v == null || v === '') return ''
+  if (v instanceof Date) return isNaN(v.getTime()) ? '' : v.toISOString().slice(0, 10)
+  const s = String(v)
+  const m = /^\d{4}-\d{2}-\d{2}/.exec(s)
+  if (m) return m[0]
+  const d = new Date(s)
+  return isNaN(d.getTime()) ? s : d.toISOString().slice(0, 10)
+}
+
 function parseDoc(absPath: string): Doc {
   const raw = readFileSync(absPath, 'utf8')
   const { data, content } = matter(raw)
@@ -147,7 +158,7 @@ function parseDoc(absPath: string): Doc {
     for (const piece of splitBySize(t)) chunks.push({ id: `${ph}#${cord}`, ord: cord++, heading: s.heading, text: piece })
   }
   return {
-    path, title, category, created: String(data.created ?? ''), status: String(data.status ?? ''),
+    path, title, category, created: toISODate(data.created), status: String(data.status ?? ''),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [], body: content, headings, links, chunks,
   }
 }

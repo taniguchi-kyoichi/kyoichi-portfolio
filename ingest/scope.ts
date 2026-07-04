@@ -7,8 +7,9 @@ import { resolve } from 'node:path'
 import matter from 'gray-matter'
 
 export const SCOPE = {
-  // 検索対象に含めるトップレベル（life ルートからの接頭辞）。コア＝確定知識・記事・判断基盤 + 引用付き外部調査。
-  includeDirs: ['knowledge/', 'content/', '.claude/contexts/', 'research/'],
+  // 検索対象に含めるトップレベル（life ルートからの接頭辞）。コア＝確定知識・記事・判断基盤 + 引用付き外部調査
+  // + 発見ファネル(ideas) + キャリア + OSS カタログ + OS 自身の設計（被覆を全ドメインへ）。
+  includeDirs: ['knowledge/', 'content/', '.claude/contexts/', 'research/', 'ideas/', 'career/', 'oss/', 'os/'],
   // status がこれらの doc は除外。
   excludeStatus: ['archived'],
   // frontmatter にこれが false の doc は個別に除外（逃げ道）。

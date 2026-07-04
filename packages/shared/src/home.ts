@@ -14,7 +14,7 @@ export interface HomeData {
   weekly: { last: string | null; daysSince: number | null; due: boolean }
   index: { lastIngest: string | null; daysSince: number | null }
   states: Record<string, number>
-  recent: { path: string; title: string; created: string | null; category: string }[]
+  recent: { path: string; title: string; created: string | null; category: string; status: string | null }[]
 }
 
 const daysBetween = (a: string, b: string) => Math.round((Date.parse(a) - Date.parse(b)) / 86400000)
@@ -98,7 +98,7 @@ export async function buildHome(db: D1Like, today: string): Promise<HomeData> {
   for (const s of stRows) if (s.status) states[s.status] = s.n
 
   const recent = (await db.prepare(
-    `SELECT path,title,created,category FROM doc WHERE created IS NOT NULL AND created != '' ORDER BY created DESC, path LIMIT 8`,
+    `SELECT path,title,created,category,status FROM doc WHERE created IS NOT NULL AND created != '' ORDER BY created DESC, path LIMIT 8`,
   ).all<HomeData['recent'][number]>()).results
 
   // 索引の鮮度（meta.last_ingest）。ingest 前は meta 未作成 → null で耐える。

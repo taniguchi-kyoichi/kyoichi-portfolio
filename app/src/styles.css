@@ -27,6 +27,7 @@
   --ok: #2f9e63;      --ok-weak: #e7f4ec;
   --warn: #bd8500;    --warn-weak: #f7efd9;
   --danger: #d8474c;  --danger-weak: #fbe9e9;
+  --review: #8a5cf0;  --review-weak: #efe9fc;  /* 承認待ち（in-review）— 進行中と区別 */
 
   --mark: #fff2a0;
   --backdrop: rgba(18, 20, 28, 0.34);
@@ -59,6 +60,7 @@
     --text: #e9eaee; --text-dim: #9a9ea9; --text-faint: #868b98;
     --accent: #8394ff; --accent-strong: #9aa7ff; --accent-weak: #1a2140;
     --ok: #4bb47f; --ok-weak: #14261d;
+    --review: #a688ff; --review-weak: #221b3a;
     --warn: #d6a032; --warn-weak: #2a2413;
     --danger: #e8686d; --danger-weak: #2c1618;
     --mark: #5a5220; --backdrop: rgba(0,0,0,.55);
@@ -163,6 +165,7 @@ h1, h2, h3, p, ul { margin: 0; }
 .s-inbox { --dot: var(--text-faint); }
 .s-draft { --dot: var(--text-dim); }   /* draft=未確定の休息点。警告ではないので中立色 */
 .s-in-progress { --dot: var(--accent); }
+.s-in-review { --dot: var(--review); }
 .s-blocked { --dot: var(--danger); }
 .s-done { --dot: var(--ok); }
 .s-archived { --dot: var(--text-faint); }

@@ -19,6 +19,8 @@ export interface BoardBrief {
   inProgress: BoardItem[]  // いま回していること（owner 必須）
   inReview: BoardItem[]     // 承認/確認待ち（あなたの確認で Done に進む）
   ready: BoardItem[]        // 次に引ける（pull ポイント）。上位のみ
+  blocked: BoardItem[]      // 止まっている（依存/ブロック）
+  backlog: BoardItem[]      // 未整理の生キャプチャ。上位のみ
   stale: BoardItem[]        // CLOSED なのに active 列に残る = 逸脱（board 掃除の合図）
 }
 
@@ -99,6 +101,8 @@ export async function fetchBoard(
     inProgress,
     inReview,
     ready: ready.slice(0, 6),
+    blocked: col('Blocked'),
+    backlog: col('Backlog').slice(0, 12),
     stale: items.filter((i) => i.closed && ACTIVE_COLUMNS.includes(i.status)),
   }
 }

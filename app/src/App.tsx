@@ -33,6 +33,7 @@ export function App() {
   const [boardData, setBoardData] = useState<BoardBrief | null>(null)
   const [cats, setCats] = useState<{ category: string; n: number }[]>([])
   const [statuses, setStatuses] = useState<{ status: string; n: number }[]>([])
+  const [tags, setTags] = useState<{ tag: string; n: number }[]>([])
   const [total, setTotal] = useState(0)
   const [arts, setArts] = useState<Artifact[] | null>(null)
   const [artsErr, setArtsErr] = useState(false)
@@ -41,6 +42,7 @@ export function App() {
   const [mode, setMode] = useState<Mode>('hybrid')
   const [category, setCategory] = useState<string | undefined>()
   const [status, setStatus] = useState<string | undefined>()
+  const [tag, setTag] = useState<string | undefined>()
   const [hits, setHits] = useState<Hit[]>([])
   const [loading, setLoading] = useState(false)
   const [docsErr, setDocsErr] = useState(false)
@@ -55,7 +57,7 @@ export function App() {
 
   useEffect(() => {
     setHomeErr(false)
-    facets().then((f) => { setCats(f.byCategory); setStatuses(f.byStatus); setTotal(f.total) }).catch(() => {})
+    facets().then((f) => { setCats(f.byCategory); setStatuses(f.byStatus); setTags(f.byTag); setTotal(f.total) }).catch(() => {})
     home().then(setHomeData).catch(() => setHomeErr(true))
     board().then(setBoardData)
   }, [nonce])
@@ -67,15 +69,12 @@ export function App() {
     if (view !== 'docs') return
     const t = setTimeout(async () => {
       setLoading(true); setDocsErr(false)
-      try {
-        let res = q.trim() ? await search(q, mode, category) : await list(category, status)
-        if (q.trim() && status) res = res.filter((h) => h.status === status) // 検索時も status 絞り込みを効かせる
-        setHits(res)
-      } catch { setDocsErr(true) }
+      try { setHits(q.trim() ? await search(q, mode, category, status) : await list(category, status, tag)) }
+      catch { setDocsErr(true) }
       finally { setLoading(false) }
     }, 180)
     return () => clearTimeout(t)
-  }, [q, mode, category, status, view, nonce])
+  }, [q, mode, category, status, tag, view, nonce])
 
   // キーボード（デスクトップ）: "/" で記録へ+フォーカス、Esc で閉じる
   useEffect(() => {
@@ -120,7 +119,7 @@ export function App() {
       await Promise.all([
         home().then(setHomeData).catch(() => setHomeErr(true)),
         board().then(setBoardData),
-        facets().then((f) => { setCats(f.byCategory); setStatuses(f.byStatus); setTotal(f.total) }),
+        facets().then((f) => { setCats(f.byCategory); setStatuses(f.byStatus); setTags(f.byTag); setTotal(f.total) }),
         artifacts().then(setArts).catch(() => {}),
       ])
     } finally { setRefreshing(false) }
@@ -169,8 +168,8 @@ export function App() {
         {view === 'docs' && (
           <DocsView
             q={q} setQ={setQ} inputRef={inputRef}
-            cats={cats} statuses={statuses} total={total}
-            category={category} setCategory={setCategory} status={status} setStatus={setStatus}
+            cats={cats} statuses={statuses} tags={tags} total={total}
+            category={category} setCategory={setCategory} status={status} setStatus={setStatus} tag={tag} setTag={setTag}
             mode={mode} setMode={setMode} showDetail={showDetail} setShowDetail={setShowDetail}
             hits={hits} loading={loading} err={docsErr} onRetry={retry} sel={sel} onOpen={openDoc}
           />
@@ -248,25 +247,27 @@ export function App() {
 
 function DocsView(p: {
   q: string; setQ: (s: string) => void; inputRef: RefObject<HTMLInputElement>
-  cats: { category: string; n: number }[]; statuses: { status: string; n: number }[]; total: number
+  cats: { category: string; n: number }[]; statuses: { status: string; n: number }[]; tags: { tag: string; n: number }[]; total: number
   category?: string; setCategory: (s: string | undefined) => void
   status?: string; setStatus: (s: string | undefined) => void
+  tag?: string; setTag: (s: string | undefined) => void
   mode: Mode; setMode: (m: Mode) => void; showDetail: boolean; setShowDetail: (b: boolean) => void
   hits: Hit[]; loading: boolean; err: boolean; onRetry: () => void; sel: Doc | null; onOpen: (path: string) => void
 }) {
   const validStatuses = p.statuses.filter((s) => s.status && s.status !== '(none)')
+  const filtered = !!(p.category || p.status || p.tag)
   return (
     <div className="collection">
       <div className="collection-head">
         <h1>記録</h1>
-        <span className="count">{p.loading ? '…' : p.q.trim() ? `${p.hits.length} 件` : `${p.total} 件`}</span>
+        <span className="count">{p.loading ? '…' : p.q.trim() || filtered ? `${p.hits.length} 件` : `${p.total} 件`}</span>
       </div>
       <div className="search-bar">
         <input ref={p.inputRef} className="search-input" value={p.q} placeholder="記録を検索"
           onChange={(e) => p.setQ(e.target.value)} aria-label="記録を検索" />
         <div className="filters">
-          <button className={`filter-chip ${!p.category && !p.status ? 'on' : ''}`}
-            onClick={() => { p.setCategory(undefined); p.setStatus(undefined) }}>すべて <span className="n">{p.total}</span></button>
+          <button className={`filter-chip ${!filtered ? 'on' : ''}`}
+            onClick={() => { p.setCategory(undefined); p.setStatus(undefined); p.setTag(undefined) }}>すべて <span className="n">{p.total}</span></button>
           {validStatuses.map((s) => (
             <button key={s.status} className={`filter-chip ${p.status === s.status ? 'on' : ''}`}
               onClick={() => p.setStatus(p.status === s.status ? undefined : s.status)}>
@@ -277,6 +278,12 @@ function DocsView(p: {
             <button key={c.category} className={`filter-chip ${p.category === c.category ? 'on' : ''}`}
               onClick={() => p.setCategory(p.category === c.category ? undefined : c.category)}>
               {c.category} <span className="n">{c.n}</span></button>
+          ))}
+          {p.tags.length > 0 && <span className="filter-sep" aria-hidden="true" />}
+          {p.tags.map((t) => (
+            <button key={t.tag} className={`filter-chip tag ${p.tag === t.tag ? 'on' : ''}`}
+              onClick={() => p.setTag(p.tag === t.tag ? undefined : t.tag)}>
+              #{t.tag} <span className="n">{t.n}</span></button>
           ))}
         </div>
         <div className="detail-toggle">
@@ -314,8 +321,10 @@ function TasksView({ board }: { board: BoardBrief | null }) {
   const { counts, wip, wipLimit } = board
   const groups: { label: string; note?: string; items: typeof board.inProgress; status: string }[] = [
     { label: 'いま回している', items: board.inProgress, status: 'in-progress' },
-    { label: '承認待ち', note: 'あなたの確認で完了に進む', items: board.inReview, status: 'in-progress' },
+    { label: '承認待ち', note: 'あなたの確認で完了に進む', items: board.inReview, status: 'in-review' },
     { label: '次に引ける', items: board.ready, status: 'inbox' },
+    { label: '止まっている', items: board.blocked, status: 'blocked' },
+    { label: '未整理', items: board.backlog, status: 'inbox' },
   ]
   const empty = board.inProgress.length + board.inReview.length + board.ready.length === 0
   return (

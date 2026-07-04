@@ -12,15 +12,15 @@ export interface Facets {
   byTag: { tag: string; n: number }[]
 }
 
-export const search = (q: string, mode: Mode, category?: string, limit = 40): Promise<Hit[]> =>
-  j(`/api/search?${qs({ q, mode, category, limit })}`)
+export const search = (q: string, mode: Mode, category?: string, status?: string, limit = 40): Promise<Hit[]> =>
+  j(`/api/search?${qs({ q, mode, category, status, limit })}`)
 export const facets = (): Promise<Facets> => j('/api/facets')
 export const getDoc = (path: string): Promise<Doc> => j(`/api/doc?${qs({ path })}`)
 export const related = (path: string): Promise<Hit[]> => j(`/api/related?${qs({ path })}`)
 export interface Heading { level: number; text: string; ord: number }
 export const outline = (path: string): Promise<Heading[]> => j(`/api/outline?${qs({ path })}`)
-export const list = (category?: string, status?: string, limit = 60): Promise<Hit[]> =>
-  j(`/api/list?${qs({ category, status, limit })}`)
+export const list = (category?: string, status?: string, tag?: string, limit = 60): Promise<Hit[]> =>
+  j(`/api/list?${qs({ category, status, tag, limit })}`)
 
 export interface HomeData {
   today: string
@@ -34,7 +34,7 @@ export interface HomeData {
   weekly: { last: string | null; daysSince: number | null; due: boolean }
   index: { lastIngest: string | null; daysSince: number | null }
   states: Record<string, number>
-  recent: { path: string; title: string; created: string | null; category: string }[]
+  recent: { path: string; title: string; created: string | null; category: string; status: string | null }[]
 }
 export const home = (): Promise<HomeData> => j('/api/home')
 
@@ -47,6 +47,8 @@ export interface BoardBrief {
   inProgress: BoardItem[]
   inReview: BoardItem[]
   ready: BoardItem[]
+  blocked: BoardItem[]
+  backlog: BoardItem[]
   stale: BoardItem[]
 }
 // board が未設定/失敗でも Home を壊さない（null を返す）

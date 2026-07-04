@@ -145,7 +145,7 @@ export function Home({ data, board, onStatus, onOpen, onTasks }: {
           <div className="card-head"><div className="overline">直近の記録</div></div>
           <div className="mini-list">
             {recent.map((r) => (
-              <ObjectRow key={r.path} title={r.title}
+              <ObjectRow key={r.path} title={r.title} status={r.status ?? undefined}
                 meta={<span>{r.category}{r.created ? ` · ${fmtDate(r.created)}` : ''}</span>}
                 onClick={() => onOpen(r.path)} />
             ))}

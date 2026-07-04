@@ -46,11 +46,11 @@ app.onError((err, c) => {
 const num = (v: string | undefined, d?: number) => (v ? Number(v) : d)
 
 app.get('/api/search', async (c) => {
-  const { q, mode, category, dateFrom, dateTo, limit } = c.req.query()
+  const { q, mode, category, status, dateFrom, dateTo, limit } = c.req.query()
   if (!q) return c.json([])
   const db = c.env.DB as unknown as D1Like
   const vx = c.env.VX as unknown as VectorizeLike
-  const opts = { category, dateFrom, dateTo, limit: num(limit, 20) }
+  const opts = { category, status, dateFrom, dateTo, limit: num(limit, 20) }
   if (mode === 'fts') return c.json(await ftsSearch(db, q, opts))
   const qvec = await embedQuery(c.env.AI, q)
   if (mode === 'semantic') return c.json(await semanticSearch(db, vx, qvec, opts))
@@ -58,12 +58,13 @@ app.get('/api/search', async (c) => {
 })
 
 app.get('/api/list', async (c) => {
-  const { category, status, limit } = c.req.query()
+  const { category, status, tag, limit } = c.req.query()
   const args: unknown[] = []
   let sql = `SELECT path, title, category, created, status, status_raw FROM doc`
   const where: string[] = []
   if (category) { where.push(`category LIKE ?`); args.push(category + '%') }
   if (status)   { where.push(`status = ?`); args.push(status) }
+  if (tag)      { where.push(`tags LIKE ?`); args.push(`%"${tag}"%`) }
   if (where.length) sql += ` WHERE ` + where.join(' AND ')
   sql += ` ORDER BY created DESC, path LIMIT ?`; args.push(num(limit, 50))
   const { results } = await c.env.DB.prepare(sql).bind(...args).all()
@@ -74,8 +75,12 @@ app.get('/api/facets', async (c) => {
   const byCategory = (await c.env.DB.prepare(`SELECT category, COUNT(*) n FROM doc GROUP BY category ORDER BY n DESC`).all()).results
   const byStatus = (await c.env.DB.prepare(`SELECT COALESCE(status,'(none)') status, COUNT(*) n FROM doc GROUP BY status ORDER BY n DESC`).all()).results
   const total = (await c.env.DB.prepare(`SELECT COUNT(*) n FROM doc`).first<any>())?.n ?? 0
-  // tags は JSON 配列で保持しているのでアプリ側集計（scaffold では省略。ingest 側で正規化テーブル化も検討）
-  return c.json({ total, byCategory, byStatus, byTag: [] })
+  // tags は JSON 配列で doc.tags に保持済み → ここで集計（再取込不要）。上位のみ返す。
+  const tagRows = (await c.env.DB.prepare(`SELECT tags FROM doc WHERE tags IS NOT NULL AND tags NOT IN ('', '[]')`).all<{ tags: string }>()).results
+  const tagCount = new Map<string, number>()
+  for (const r of tagRows) { try { for (const t of JSON.parse(r.tags) as string[]) tagCount.set(t, (tagCount.get(t) ?? 0) + 1) } catch { /* 壊れた tags はスキップ */ } }
+  const byTag = [...tagCount.entries()].map(([tag, n]) => ({ tag, n })).sort((a, b) => b.n - a.n).slice(0, 24)
+  return c.json({ total, byCategory, byStatus, byTag })
 })
 
 app.get('/api/doc', async (c) => {

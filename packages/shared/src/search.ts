@@ -1,7 +1,7 @@
 // D1(FTS5 trigram) + Vectorize(bge-m3 KNN) の検索。ローカル db.ts の ftsSearch/semanticSearch/hybridSearch を
 // D1 + Vectorize 向けに移植。RRF 融合ロジックは同一。
 
-export interface SearchOpts { category?: string; dateFrom?: string; dateTo?: string; limit?: number }
+export interface SearchOpts { category?: string; status?: string; dateFrom?: string; dateTo?: string; limit?: number }
 
 export interface D1Stmt {
   bind(...args: unknown[]): D1Stmt
@@ -23,12 +23,13 @@ export async function ftsSearch(db: D1Like, q: string, opts: SearchOpts = {}) {
   const match = `"${q.replace(/"/g, '""')}"`
   const args: unknown[] = [match]
   let sql = `
-    SELECT d.path, d.title, d.category, d.created,
+    SELECT d.path, d.title, d.category, d.created, d.status,
            snippet(doc_fts, 2, '⟦', '⟧', ' … ', 12) AS snippet,
            bm25(doc_fts) AS score
     FROM doc_fts JOIN doc d ON d.path = doc_fts.path
     WHERE doc_fts MATCH ?`
   if (opts.category) { sql += ` AND d.category LIKE ?`; args.push(opts.category + '%') }
+  if (opts.status)   { sql += ` AND d.status = ?`; args.push(opts.status) }
   if (opts.dateFrom) { sql += ` AND d.created >= ?`; args.push(opts.dateFrom) }
   if (opts.dateTo)   { sql += ` AND d.created <= ?`; args.push(opts.dateTo) }
   sql += ` ORDER BY score LIMIT ?`; args.push(opts.limit ?? 20)
@@ -55,9 +56,10 @@ export async function semanticSearch(db: D1Like, vx: VectorizeLike, qvec: number
 async function enrich(db: D1Like, entries: { path: string; distance: number; heading?: string }[], opts: SearchOpts) {
   const out: any[] = []
   for (const e of entries) {
-    const m = await db.prepare(`SELECT path,title,category,created FROM doc WHERE path = ?`).bind(e.path).first<any>()
+    const m = await db.prepare(`SELECT path,title,category,created,status FROM doc WHERE path = ?`).bind(e.path).first<any>()
     if (!m) continue
     if (opts.category && !String(m.category).startsWith(opts.category)) continue
+    if (opts.status && m.status !== opts.status) continue
     if (opts.dateFrom && (m.created ?? '') < opts.dateFrom) continue
     if (opts.dateTo && (m.created ?? '') > opts.dateTo) continue
     out.push({ ...m, distance: e.distance, matchedHeading: e.heading })
