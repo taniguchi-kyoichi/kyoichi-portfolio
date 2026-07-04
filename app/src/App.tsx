@@ -190,7 +190,7 @@ export function App() {
             </div>
             <iframe className="art-frame" title={artSel.path}
               src={`/api/artifact?path=${encodeURIComponent(artSel.path)}`}
-              sandbox="allow-scripts allow-popups allow-downloads" />
+              sandbox="allow-scripts allow-same-origin allow-popups allow-downloads" />
           </div>
         </>
       )}
