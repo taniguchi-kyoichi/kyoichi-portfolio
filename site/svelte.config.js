@@ -10,14 +10,7 @@ const config = {
 			platformProxy: {
 				remoteBindings: false
 			}
-		}),
-		prerender: {
-			// AASA はどこからもリンクされないので、クロールでは見つからない。
-			// **prerender させたいのは、ビルド時に中身の検証を走らせるため**
-			// （universal-links.ts が形を確かめて throw する）。Apple の CDN は最大 48 時間
-			// キャッシュして手動で無効化できないので、壊れたものを配ると 2 日間直せない。
-			entries: ['*', '/.well-known/apple-app-site-association']
-		}
+		})
 	}
 };
 
