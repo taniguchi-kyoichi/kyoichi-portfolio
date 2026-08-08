@@ -24,7 +24,9 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.tpl
-!.env.cloudflare.tpl   # op:// 参照のみ（秘密値なし）。AI/CI が op run で使う
+# op:// 参照のみ（秘密値なし）。AI/CI が op run で使う
+# 行末コメントを付けると否定パターンの一部として扱われ、除外が黙って効かなくなる
+!.env.cloudflare.tpl
 
 # Vite
 vite.config.js.timestamp-*
