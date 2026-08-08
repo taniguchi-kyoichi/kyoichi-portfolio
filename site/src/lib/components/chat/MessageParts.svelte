@@ -15,9 +15,9 @@
 
 	let { message }: Props = $props();
 
-	// In-progress states show a skeleton; `output-error` renders nothing because
-	// Workers AI models occasionally fail the first tool attempt and the AI SDK
-	// retries — the successful retry renders the real card.
+	// In-progress states show a skeleton. A failed tool gets its own visible
+	// branch below — swallowing `output-error` silently is what let a provider
+	// bug break every card while the chat still looked like it was working.
 	function loading(state: string): boolean {
 		return state === 'input-streaming' || state === 'input-available';
 	}
@@ -28,6 +28,12 @@
 		{#if part.text.trim()}
 			<Markdown text={part.text} />
 		{/if}
+
+		<!-- any tool that failed -> say so instead of rendering an empty answer -->
+	{:else if 'state' in part && part.state === 'output-error'}
+		<p class="text-sm text-gray-500 dark:text-gray-400">
+			情報を読み込めませんでした。もう一度お試しください。
+		</p>
 
 		<!-- getProfile -> ProfileCard -->
 	{:else if part.type === 'tool-getProfile'}
