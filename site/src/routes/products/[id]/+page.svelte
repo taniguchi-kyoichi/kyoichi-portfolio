@@ -259,6 +259,38 @@
 							{data.product.platforms.map(p => platformLabel[p] ?? p).join(', ')}
 						</dd>
 					</div>
+					<!--
+						法務ページへの導線。**これまで片方向だった** —— privacy / support から製品ページへは
+						戻れるのに、製品ページからは辿れなかった。App Store に登録する URL がこの 2 本なので、
+						製品を知った人が同じ面から辿れないと、探す先が検索しか無くなる。
+						`product.privacy` / `product.support` が無いプロダクトではルート自体が 404 なので出さない。
+					-->
+					{#if data.product.privacy}
+						<div class="flex items-center justify-between px-6 py-4">
+							<dt class="text-gray-500 dark:text-gray-400">プライバシー</dt>
+							<dd>
+								<a
+									href="/products/{data.product.id}/privacy"
+									class="font-medium text-primary-600 hover:underline dark:text-primary-400"
+								>
+									プライバシーポリシー
+								</a>
+							</dd>
+						</div>
+					{/if}
+					{#if data.product.support}
+						<div class="flex items-center justify-between px-6 py-4">
+							<dt class="text-gray-500 dark:text-gray-400">サポート</dt>
+							<dd>
+								<a
+									href="/products/{data.product.id}/support"
+									class="font-medium text-primary-600 hover:underline dark:text-primary-400"
+								>
+									サポート・よくある質問
+								</a>
+							</dd>
+						</div>
+					{/if}
 				</dl>
 			</div>
 		</section>

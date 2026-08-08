@@ -232,10 +232,13 @@ export const products: Product[] = [
 		type: 'app',
 		status: 'development',
 		platforms: ['ios'],
-		links: {},
+		// App Store のリンクは**公開を確かめてから**入れる（審査中に入れると 404 を晒す）。
+		// それまでの受け皿は製品サイト。
+		links: { web: 'https://stock-radar.taniguchi-kyoichi.com' },
 		technologies: ['Swift', 'SwiftUI', 'Cloudflare Workers', 'D1', 'Firebase'],
+		thumbnail: '/stock-radar-icon.png',
+		ogImage: '/stock-radar-icon.jpg',
 		featured: false,
-		hidden: true,
 		price: '無料（ふたりプランのみ有料）',
 		category: 'ライフスタイル',
 		ageRating: '4+',
@@ -247,7 +250,9 @@ export const products: Product[] = [
 			'氏名・メール不要。データはいつでも書き出し・削除'
 		],
 		privacy: {
-			effectiveDate: '2026-07-19',
+			// 本文を実態に合わせて書き直した日。**中身を直したらここも直す** ——
+			// 表示だけ古い日付が残ると、法務ページがそのページ自身の内容と食い違う。
+			effectiveDate: '2026-08-02',
 			dataCollection: 'minimal',
 			dataItems: [
 				'匿名アカウント識別子（Firebase 匿名 / Apple / Google Sign-In の uid）',
