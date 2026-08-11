@@ -10,6 +10,7 @@ import { createWorkersAI } from 'workers-ai-provider';
 import { error } from '@sveltejs/kit';
 import { tools } from '$lib/server/tools';
 import { checkRateLimit } from '$lib/server/rateLimit';
+import { withoutDuplicatedChunks } from '$lib/server/aiBinding';
 import type { RequestHandler } from './$types';
 
 /** A friendly, SDK-correct error stream (so the client shows the message). */
@@ -22,30 +23,27 @@ function messageStream(text: string): Response {
 
 // Llama 4 Scout returns *structured* tool calls and follows the JP persona well.
 // (Tested alternatives on Workers AI: llama-3.3-70b-fp8-fast emits tool calls as
-// plain-text JSON — never parsed; mistral-small-3.1 double-streams tool args and
-// errors. Scout is the reliable free option here.)
+// plain-text JSON — never parsed. Scout is the reliable free option here.)
+//
+// Scout is sensitive to prompt weight: as the system prompt and tool block grow,
+// it starts answering with an empty completion instead of a tool call. Keep the
+// prompt below short and the tool schemas lean.
 const MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
 
 // Route Workers AI through this AI Gateway for caching (free repeated prompts),
 // usage analytics, and a $10/month spend limit that hard-stops at the cap.
 const AI_GATEWAY_ID = 'portfolio-ai';
 
-const SYSTEM = `You are the AI assistant on Kyoichi Taniguchi's portfolio, answering visitors' questions (Japanese or English) about him.
+const SYSTEM = `You are the AI assistant on Kyoichi Taniguchi's portfolio. Visitors ask about him in Japanese or English.
 
-Treat every message as a valid question about Kyoichi — never reply that the input is incomplete or ask the visitor to clarify.
+Answer by calling exactly one of these tools, which fetches the facts and renders a card:
+getProfile (who he is, background), listProducts (his apps), getProductDetail (one specific app), listOSS (open source, libraries), getContact (contact, hiring), listWritings (blog posts), listReinArticles (Rein media), listVideos (YouTube).
 
-When to use tools (they fetch facts AND render a card in the UI):
-- Call a tool when the visitor wants to SEE items, or for facts not already in this conversation.
-- For the first or ambiguous question, call getProfile.
-- For follow-up questions you can already answer from earlier tool results (e.g. "why did he build it?", "tell me more"), reply in TEXT only. Do NOT re-call the same tool or repeat a card already shown — that's redundant.
+Use those names exactly. Answer follow-ups from earlier tool results in text only, and never call the same tool twice.
 
-Keep text VERY short:
-- When a tool renders cards (products / articles / videos / OSS), the UI ALREADY shows every item. Your text must be ONE short sentence that does NOT mention any specific title or detail, and must NOT contain a list, bullets (-, *), or numbers (1. 2.). Good examples: "最新の記事はこちらです。" / "Here are his latest articles." Then STOP.
-- For text-only answers (no card), at most 2-3 short sentences.
+Always answer in the language the visitor wrote in — a Japanese question gets a Japanese answer, an English question gets an English one. Call him 谷口さん in Japanese and Kyoichi in English.
 
-- Never invent facts; if the data isn't there, say so plainly.
-- Refer to him in third person — "谷口さん" (Japanese) / "Kyoichi" (English).
-- Match the visitor's language. Friendly, concise, no filler preamble.`;
+The card already shows every item, so your text must never repeat them. With a card, write ONE short sentence naming nothing — no titles, URLs, bullets, or numbers — then stop. Good: "最新の記事はこちらです。" / "Here are his open-source projects." Without a card, keep it to two or three sentences. Never invent facts.`;
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const ai = platform?.env?.AI;
@@ -85,7 +83,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		return messageStream('メッセージが長すぎます。短く分けてお試しください。');
 	}
 
-	const workersai = createWorkersAI({ binding: ai, gateway: { id: AI_GATEWAY_ID } });
+	const workersai = createWorkersAI({
+		binding: withoutDuplicatedChunks(ai),
+		gateway: { id: AI_GATEWAY_ID }
+	});
 
 	const result = streamText({
 		model: workersai(MODEL),

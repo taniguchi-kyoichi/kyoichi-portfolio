@@ -62,6 +62,11 @@ op run --env-file=.env.cloudflare.tpl -- bash -c 'cd mcp && wrangler deploy'
   - `ai` → `AI`（Workers AI・AskAI `/ask`,`/api/chat` の推論。APIキー不要）
   - `kv_namespaces` → `CHAT_LIMITS`(`e1a0f7df4862482fb2cd1e9c40c4e84b`)（`/api/chat` のレート制限）
   - `compatibility_date=2025-04-01` + `nodejs_compat`（AI SDK の AsyncLocalStorage）
+- **AskAI のコード側の前提（外すと「回答が返ってこない」が再発する）**:
+  - `site/src/lib/server/aiBinding.ts` の `withoutDuplicatedChunks()` で binding を包む。Workers AI は 1 チャンクに同じ内容を native(`response`/`tool_calls`) と OpenAI(`choices[0].delta`) の両スロットへ入れて返し、workers-ai-provider が両方写すため、**外すとテキストが 2 重になり tool 引数が `{}{}` になって全 tool 呼び出しが落ちる**（provider 3.2.1〜4.0.0 で未修正。上流を直すまで必要）
+  - tool の `inputSchema` は `tools.ts` の `toolInput()` を通す。AI SDK の zod 変換が付ける `$schema` キーが入ると **Llama 4 Scout が空の completion を返す**（テキストも tool 呼び出しも無し・エラーも出ない）
+  - システムプロンプトと tool スキーマは短く保つ。Scout はプロンプト重量が増えると同じ空応答に落ちる
+  - 変更したら 7 問スモーク（人物 / アプリ / OSS / 連絡 / 記事 / 動画 / 英語）で **tool-output-available が出ること**まで確認する。`/api/chat` を curl すると生の SSE が読める
 - **secret（Worker にサーバ側保管・wrangler.jsonc には出ない。デプロイでは消えないが、Worker 再作成時は再投入）**:
   - `YOUTUBE_API_KEY`（ホーム/AI の YouTube 動画。無いと `getVideos` が空配列）。値は 1Password `op://Prod-Apps/kyoichi-portfolio YouTube Data API/credential`
   - **api の `INTERNAL_SECRET`**（service binding mcp→api の共有シークレット。`X-Internal-Service` ヘッダ照合値。無い/不一致は Access JWT が要る）。値は 1Password `op://Infra-CICD/cloud-hub api INTERNAL_SECRET/credential`。**api と mcp の両 Worker に同値を投入**。固定値バイパス(`:1`)は塞ぎ済み
@@ -73,7 +78,7 @@ op run --env-file=.env.cloudflare.tpl -- bash -c 'cd mcp && wrangler deploy'
 
 ## 状態（2026-07-04）
 
-- site = Pages→Workers 移行 **完了・稼働中**（apex+www が cloud-hub-site Worker で 200）。**最新 main + AskAI + YouTube 全て動作確認済み**。旧 Pages プロジェクト `kyoichi-portfolio` 削除済み。
+- site = Pages→Workers 移行 **完了・稼働中**（apex+www が cloud-hub-site Worker で 200）。**最新 main + AskAI + YouTube 全て動作確認済み**。旧 Pages プロジェクト `kyoichi-portfolio` 削除済み。AskAI は 7 問スモークで全問 tool 実行成功・カード表示まで本番確認済み（前提は上の ⚠️ 節）。
 - **api = デプロイ済み・稼働中**（`api.taniguchi-kyoichi.com`）: D1 `life-index`(id `cc2716ad-ea90-4d67-896b-04cf804f8c9c`, schema 適用・trigram 実 D1 で検証済) + Vectorize `life-index`(1024/cosine) + Workers AI 結線。`/health` 200・`/api/*` は Access JWT ゲート(401)・`X-Internal-Service:1` で service binding 経路(200)。**ACCESS_AUD は placeholder**（Zero Trust 設定で実 AUD を入れて再 deploy）。
 - **H2 ingest 実施済み（コアスコープ）**: `ingest/scope.ts` の宣言的スコープ = **knowledge/ + content/ + .claude/contexts/**（archived / frontmatter `searchable:false` 除外）。141文書/1723チャンクを bge-m3 で D1+Vectorize へ投入。**FTS/semantic/hybrid が実データで本番動作確認済み**。高価な埋め込み層はコアに限定、範囲外は非semantic手段でカバーする方針。
 - **mcp = デプロイ済み・稼働中**（`mcp.taniguchi-kyoichi.com/mcp`）: McpAgent(DO) → service binding → api。tools=search/get/outline/list/facets（related は api の /api/related 実装後に追加）。**bearer ゲート**（`MCP_AUTH_SECRET`）。initialize/tools/list/tools/call を実データで確認済み。
