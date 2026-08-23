@@ -1,0 +1,46 @@
+name: Deploy Site
+
+# main への push のみ。**このリポジトリには長いあいだ CD が無く、PR をマージしても
+# 誰かが手元で deploy を叩くまで本番は変わらなかった。** 2026-08-23 の時点で本番は
+# 8/8 より前の建物のままで、ストックレーダーがホームに出ていなかった（詳細ページだけ
+# 生きていたのは、当時 hidden: true でルートだけ残っていたから）。
+#
+# api / mcp は対象外。Access の設定と絡むので、それぞれ別に決める。
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/deploy-site.yml"
+
+# デプロイは直列。2ランが並ぶと、古いコミットのランが後に完走して新しいデプロイを
+# 上書きする（stock-radar で実際に踏んだ）。走行中の古いランは畳んで最新だけ通す。
+concurrency:
+  group: deploy-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      # root が workspace（単一 bun.lock）なので install は root で行う
+      - run: bun install --frozen-lockfile
+      - name: Build
+        working-directory: site
+        run: bun run build
+      # binding（AI / CHAT_LIMITS）は site/wrangler.jsonc がコミット済みで持っている。
+      # secret（YOUTUBE_API_KEY 等）は Worker 側に保管され、deploy では消えない。
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: site
+          command: deploy
+      # **「デプロイが success」と「本番がそうなっている」は別の性質。**
+      # ソースが出すと言っている製品が、本番のホームに実在するかを見る。
+      # 版番号ではなく中身を見るので、古い版が配られている場合も捕まる。
+      - name: 本番に届いたか（宣言ではなく現物を見る）
+        working-directory: site
+        run: node scripts/verify-deploy.mjs

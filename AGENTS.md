@@ -43,8 +43,18 @@ op run --env-file=.env.cloudflare.tpl -- bun ingest/ingest.ts <file.md ...>
 
 ## デプロイ
 
+**site は main マージで自動デプロイされる**（`.github/workflows/deploy-site.yml`・`site/**` の変更のみ）。
+デプロイ後に `site/scripts/verify-deploy.mjs` が走り、**ソースが出すと言っている製品が本番の
+ホームに実在するか**を現物で確かめる。ここが赤なら「success なのに古い建物が配られている」。
+
+**手で叩くのは、CD を通さずに緊急で直すときだけ。** 2026-08-23 まで CD が無く、
+PR をマージしても本番が 8/8 より前のまま止まっていた（ストックレーダーがホームに出ず、
+詳細ページだけ生きていた）。**マージした ≠ 本番がそうなっている。**
+
+api / mcp は自動化していない（Access の設定と絡む）ので、下記を手で叩く。
+
 ```
-# site（apex + www・Workers Static Assets）
+# site（apex + www・Workers Static Assets）— 通常は CD に任せる
 op run --env-file=.env.cloudflare.tpl -- bash -c 'cd site && bun run build && wrangler deploy'
 # api / mcp（Access 設定は life/projects/cloud-hub/zero-trust-runbook.md）
 op run --env-file=.env.cloudflare.tpl -- bash -c 'cd api && wrangler deploy'
