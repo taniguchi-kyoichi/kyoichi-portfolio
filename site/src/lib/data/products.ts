@@ -35,21 +35,19 @@ export const products: Product[] = [
 			effectiveDate: '2026-02-14',
 			dataCollection: 'standard',
 			dataItems: [
-				'アカウント情報（Google/Apple Sign-In）',
-				'読書記録・本棚データ（Firestore クラウド同期）',
-				'チャットメモ・AI対話履歴（Firestore クラウド同期）',
-				'プロフィール情報・アバター画像（Cloud Storage）',
-				'読書目標・アチーブメント（Firestore クラウド同期）',
-				'アプリ利用状況（Firebase Analytics）'
+				'アカウントを識別するための ID（Apple または Google のサインイン）',
+				'登録した本と、読書の記録',
+				'本について書いたメモと、AI とのやりとり',
+				'ニックネームとプロフィール画像',
+				'読書の目標と、達成の記録',
+				'アプリ内の操作の記録（改善のために使います）'
 			],
 			thirdPartyServices: [
-				'Firebase Authentication（ユーザー認証）',
-				'Cloud Firestore（データ保存・同期）',
-				'Cloud Storage for Firebase（画像保存）',
-				'Firebase Analytics（利用状況分析）',
-				'Claude API by Anthropic（AI対話機能）',
-				'Google Books API / OpenBD（書籍情報検索）',
-				'RevenueCat（サブスクリプション管理）'
+				'Google（サインイン、データの保管、利用状況の分析）',
+				'Apple（サインイン）',
+				'Anthropic（本についての AI との対話）',
+				'RevenueCat（サブスクリプションの管理）',
+				'書籍情報の検索サービス（本を探すときに、書名や ISBN を送ります）'
 			],
 			analyticsUsed: true,
 			contactEmail: 'info@taniguchi-kyoichi.com'
@@ -59,7 +57,8 @@ export const products: Product[] = [
 			faq: [
 				{
 					question: 'データはどこに保存されますか？',
-					answer: '読書記録やメモはFirebase（Google Cloud）上に安全に保存され、デバイス間で同期されます。アカウントにログインすれば、どのデバイスからでもデータにアクセスできます。'
+					answer:
+						'読書記録やメモはサーバーに保存され、お使いの端末のあいだで同期されます。サインインすれば、どの端末からでも同じ記録に戻れます。'
 				},
 				{
 					question: 'インターネット接続は必要ですか？',
@@ -111,16 +110,16 @@ export const products: Product[] = [
 			effectiveDate: '2026-07-19',
 			dataCollection: 'standard',
 			dataItems: [
-				'アカウント情報（匿名サインイン。任意で Google / Apple 連携）',
-				'習慣・ごほうび・達成／交換の記録（クラウドにバックアップ・同期）',
-				'購入状態（RevenueCat）',
-				'広告識別子（無料版の広告配信のみ）'
+				'アカウントを識別するための ID（端末内で作られる匿名の ID。任意で Apple または Google と連携）',
+				'登録した習慣・ごほうびと、達成や交換の記録',
+				'Pro の購入状態',
+				'広告識別子（無料版の広告配信にのみ使います）'
 			],
 			thirdPartyServices: [
-				'Firebase Authentication（匿名 + Google / Apple サインイン）',
-				'Cloudflare Workers / D1（データのバックアップ・同期）',
-				'RevenueCat（アプリ内課金の管理）',
-				'Google AdMob（広告配信・無料版のみ）'
+				'Google（サインイン、無料版の広告配信）',
+				'Apple（サインイン）',
+				'Cloudflare（データの保管とバックアップ）',
+				'RevenueCat（アプリ内課金の管理）'
 			],
 			analyticsUsed: false,
 			contactEmail: 'info@taniguchi-kyoichi.com'
@@ -260,23 +259,21 @@ export const products: Product[] = [
 			effectiveDate: '2026-08-23',
 			dataCollection: 'minimal',
 			dataItems: [
-				'匿名アカウント識別子（Firebase 匿名 / Apple / Google Sign-In の uid）',
-				'表示名（「あなた／パートナー」の表示に使うニックネーム。本名は保存しません）',
-				'在庫アイテム・購入記録（Cloudflare D1 にクラウド同期）',
-				'アイテム・世帯・プロフィールの画像（Cloudflare R2 に保存）',
-				'レシートの写真（読み取りのため送信し、保存はしません）',
-				'世帯共有の招待情報（招待コードはハッシュのみ保存）',
-				'プッシュ通知トークン（切れかけ通知の配信）',
-				'サブスクリプションの購入状態（RevenueCat）',
-				'アプリ内の操作イベント（改善のための利用状況分析。広告には使いません）'
+				'アカウントを識別するための ID（端末内で作られる匿名の ID、または Apple・Google のサインイン）',
+				'表示名（「あなた／パートナー」の区別に使うニックネーム。本名は保存しません）',
+				'登録した日用品と、買った記録',
+				'ご自身で撮影した写真（アイテムや世帯のアイコン）',
+				'レシートの写真（読み取りのために送信し、読み取った後は保存しません）',
+				'世帯に招待するためのコード（そのままではなく、元に戻せない形にして保存します）',
+				'通知を届けるための端末の識別子',
+				'ふたりプランの加入状況',
+				'アプリ内の操作の記録（改善のために使います。広告には使いません）'
 			],
 			thirdPartyServices: [
-				'Firebase Authentication（匿名・Apple・Google のユーザー認証）',
-				'Firebase Analytics（利用状況の分析。広告 ID は取得しません）',
-				'Cloudflare Workers / D1 / R2（データ・画像の保存、世帯同期）',
-				'Google Gemini（バーコードとレシートの読み取り。画像は保存しません）',
-				'Apple Push Notification service（通知配信）',
-				'RevenueCat（サブスクリプション管理）'
+				'Google（サインイン、利用状況の分析、レシートと商品名の読み取り）',
+				'Apple（サインイン、通知の配信）',
+				'Cloudflare（データと写真の保管、世帯のあいだの同期）',
+				'RevenueCat（サブスクリプションの管理）'
 			],
 			analyticsUsed: true,
 			contactEmail: 'info@taniguchi-kyoichi.com'
@@ -297,7 +294,7 @@ export const products: Product[] = [
 				{
 					question: 'データはどこに保存されますか？',
 					answer:
-						'在庫や購入記録は Cloudflare（D1）に安全に保存され、世帯内のデバイス間で同期されます。氏名やメールアドレスは保存しません（メンバーは「あなた／パートナー」の役割で扱います）。'
+						'在庫や購入の記録はサーバーに保存され、世帯のメンバーのあいだで同期されます。氏名やメールアドレスは保存しません（メンバーは「あなた／パートナー」として扱います）。'
 				},
 				{
 					question: 'アカウントやデータを削除するには？',
