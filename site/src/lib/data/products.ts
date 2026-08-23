@@ -257,7 +257,7 @@ export const products: Product[] = [
 		privacy: {
 			// 本文を実態に合わせて書き直した日。**中身を直したらここも直す** ——
 			// 表示だけ古い日付が残ると、法務ページがそのページ自身の内容と食い違う。
-			effectiveDate: '2026-08-02',
+			effectiveDate: '2026-08-23',
 			dataCollection: 'minimal',
 			dataItems: [
 				'匿名アカウント識別子（Firebase 匿名 / Apple / Google Sign-In の uid）',
