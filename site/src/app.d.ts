@@ -1,6 +1,9 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
+	/** ビルド時刻（ISO8601・秒精度）。vite.config.ts の define が埋め込む。 */
+	const __BUILD_TIME__: string;
+
 	namespace App {
 		// interface Error {}
 		// interface Locals {}

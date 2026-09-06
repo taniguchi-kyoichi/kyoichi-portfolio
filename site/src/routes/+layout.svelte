@@ -34,6 +34,15 @@
 		}
 	);
 
+	// エラー応答は「そのURLの中身」ではないので、インデックスさせず canonical も出さない。
+	// +layout.server.ts は常に seo を返すため、404 でも自分自身を canonical に指す
+	// index 可能なページとして出ていた（Search Console が 404 と判定したので実害は
+	// 出ていないが、ソフト404 と読まれる余地を残す）。
+	const isError = $derived(page.status >= 400);
+	// robots はここが唯一の出力点。app.html にも固定値を置くと noindex 指定時に
+	// 2 つ出て矛盾する。
+	const noindex = $derived(isError || seo.noindex === true);
+
 	const websiteJsonLd = {
 		'@context': 'https://schema.org',
 		'@type': 'WebSite',
@@ -58,8 +67,12 @@
 <svelte:head>
 	<title>{seo.title}</title>
 	<meta name="description" content={seo.description} />
-	<link rel="canonical" href={seo.canonical} />
-	{#if seo.noindex}<meta name="robots" content="noindex, follow" />{/if}
+	{#if noindex}
+		<meta name="robots" content="noindex, follow" />
+	{:else}
+		<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+	{/if}
+	{#if !isError}<link rel="canonical" href={seo.canonical} />{/if}
 
 	<!-- Open Graph -->
 	<meta property="og:site_name" content={SITE_NAME} />

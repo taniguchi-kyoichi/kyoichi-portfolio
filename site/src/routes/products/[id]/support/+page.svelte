@@ -19,7 +19,6 @@
 </script>
 
 <svelte:head>
-	<meta name="robots" content="noindex, nofollow" />
 	{#if support.faq && support.faq.length > 0}
 		{@html `<script type="application/ld+json">${JSON.stringify({
 			'@context': 'https://schema.org',

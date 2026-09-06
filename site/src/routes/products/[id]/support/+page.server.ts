@@ -20,7 +20,9 @@ export const load: PageServerLoad = async ({ params }) => {
 		ogImageAlt: SITE_NAME,
 		ogImageWidth: DEFAULT_OG_IMAGE_SIZE,
 		ogImageHeight: DEFAULT_OG_IMAGE_SIZE,
-		twitterCard: 'summary'
+		twitterCard: 'summary',
+		// アプリ審査のために URL を生かしているだけの法務ページ。検索には出さない。
+		noindex: true
 	};
 
 	return { product, seo };

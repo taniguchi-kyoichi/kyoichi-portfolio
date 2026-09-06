@@ -18,10 +18,6 @@
 	};
 </script>
 
-<svelte:head>
-	<meta name="robots" content="noindex, nofollow" />
-</svelte:head>
-
 <article class="min-h-screen bg-gray-50 dark:bg-gray-900">
 	<div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
 		<!-- Back link -->
