@@ -194,34 +194,6 @@ export const products: Product[] = [
 		]
 	},
 	{
-		id: 'now-my-task',
-		name: 'now my task',
-		description:
-			'頭の中の「あれやらなきゃ」を、ぜんぶ手放せる。一行書くと「自分でやる／人やAIに頼んだ／自分で決める」に自動で分かれ、ちょうどいい時に思い出させる、AI時代の非同期タスク管理アプリ。',
-		fullDescription:
-			'now my task は、頭の中でタスクを覚えておく負担をゼロにするためのタスク管理アプリです。思いついたことを一行書くだけで、「自分でやる」「人やAIに頼んだ」「自分で決める」に自動で振り分け、ちょうどいい時間や場所が来たら、ひとつずつ「今やること」として戻してくれます。\n\nこれからは、自分でこなすだけでなく、AIや人に頼んで非同期に進めるのが当たり前。頼んだことの確認を忘れず、「帰ったら」「会社で」といった未来の自分宛の用事も頭から手放せます。そして、AIに結論を出させてはいけない大事な判断は、自分で考える時間として守ります。\n\n開発の過程を公開しながらつくっています（build in public）。',
-		type: 'app',
-		status: 'development',
-		platforms: ['ios'],
-		links: {
-			web: 'https://nowmytask.com'
-		},
-		technologies: ['Swift', 'SwiftUI', 'Cloudflare Workers', 'Workers AI'],
-		thumbnail: '/now-my-task-icon.png',
-		ogImage: '/now-my-task-icon.png',
-		buildInPublic: true,
-		price: '無料（プレミアム予定）',
-		category: '仕事効率化',
-		ageRating: '4+',
-		features: [
-			'一行書くだけで「自分でやる／人やAIに頼んだ／自分で決める」に自動で整理',
-			'人やAIに頼んだことを、ちょうどいい時刻に思い出させる',
-			'「帰ったら」「会社で」など、未来の自分に渡して頭から消す',
-			'大事な判断はAIに結論を出させず、自分で決める時間を残す',
-			'通知から1タップで完了／再通知'
-		]
-	},
-	{
 		id: 'stock-radar',
 		name: 'ストックレーダー',
 		description:
