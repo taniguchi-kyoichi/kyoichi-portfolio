@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { marked } from 'marked';
 	import type { OSSProject } from '$lib/types';
 	import { ossKindLabel } from '$lib/data/oss';
 	import SocialIcon from '$lib/components/SocialIcon.svelte';
@@ -8,7 +7,8 @@
 	interface Props {
 		data: {
 			project: OSSProject;
-			readme: string | null;
+			/** README を絶対 URL へ解決済みの HTML。組み立ては $lib/server/readme。 */
+			readmeHtml: string | null;
 			related: OSSProject[];
 			docc: Record<string, string | null>;
 		};
@@ -29,8 +29,6 @@
 		Ruby: 'bg-red-500',
 		Shell: 'bg-gray-500'
 	};
-
-	const renderedReadme = $derived(data.readme ? marked(data.readme) : null);
 </script>
 
 <article class="bg-white py-12 md:py-20 dark:bg-gray-900">
@@ -134,11 +132,11 @@
 		</header>
 
 		<!-- README content -->
-		{#if renderedReadme}
+		{#if data.readmeHtml}
 			<section
 				class="prose prose-gray max-w-none dark:prose-invert prose-headings:font-semibold prose-a:text-primary-600 prose-code:rounded prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:before:content-none prose-code:after:content-none prose-pre:bg-gray-900 dark:prose-a:text-primary-400 dark:prose-code:bg-gray-800"
 			>
-				{@html renderedReadme}
+				{@html data.readmeHtml}
 			</section>
 		{:else}
 			<div

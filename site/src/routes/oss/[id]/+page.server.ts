@@ -5,31 +5,7 @@ import { profile } from '$lib/data/profile';
 import { DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_SIZE, SITE_URL } from '$lib/seo';
 import type { SEO } from '$lib/seo';
 import { resolveDoccUrls } from '$lib/server/docc';
-
-async function fetchReadme(
-	repository: string,
-	fetchFn: typeof fetch
-): Promise<string | null> {
-	const repoMatch = repository.match(/github\.com\/([^/]+)\/([^/]+)/);
-	if (!repoMatch) return null;
-
-	const [, owner, repo] = repoMatch;
-
-	try {
-		const main = await fetchFn(
-			`https://raw.githubusercontent.com/${owner}/${repo}/main/README.md`
-		);
-		if (main.ok) return await main.text();
-
-		const master = await fetchFn(
-			`https://raw.githubusercontent.com/${owner}/${repo}/master/README.md`
-		);
-		if (master.ok) return await master.text();
-	} catch {
-		return null;
-	}
-	return null;
-}
+import { fetchReadme, renderReadme } from '$lib/server/readme';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const project = ossProjects.find((p) => p.id === params.id);
@@ -50,6 +26,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		fetchReadme(project.repository, fetch),
 		resolveDoccUrls([project, ...related])
 	]);
+
+	// README の相対リンクはリポジトリ基準なので、ここで絶対 URL に解決してから配る。
+	// 素通しすると `[LICENSE](LICENSE)` が `/oss/LICENSE` になって 404 を量産する。
+	const readmeHtml = readme ? renderReadme(readme) : null;
 
 	// Front-load the package name + its one-line purpose so the SERP title carries
 	// the keywords people actually search ("swift markdown", "swift router", …),
@@ -78,5 +58,5 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		}
 	};
 
-	return { project, readme, related, docc, seo };
+	return { project, readmeHtml, related, docc, seo };
 };

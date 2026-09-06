@@ -2,31 +2,7 @@ import type { RequestHandler } from './$types';
 import { ossProjects } from '$lib/data/oss';
 import { error } from '@sveltejs/kit';
 import { SITE_URL } from '$lib/seo';
-
-async function fetchReadme(
-	repository: string,
-	fetchFn: typeof fetch
-): Promise<string | null> {
-	const repoMatch = repository.match(/github\.com\/([^/]+)\/([^/]+)/);
-	if (!repoMatch) return null;
-
-	const [, owner, repo] = repoMatch;
-
-	try {
-		const main = await fetchFn(
-			`https://raw.githubusercontent.com/${owner}/${repo}/main/README.md`
-		);
-		if (main.ok) return await main.text();
-
-		const master = await fetchFn(
-			`https://raw.githubusercontent.com/${owner}/${repo}/master/README.md`
-		);
-		if (master.ok) return await master.text();
-	} catch {
-		return null;
-	}
-	return null;
-}
+import { fetchReadme } from '$lib/server/readme';
 
 export const GET: RequestHandler = async ({ params, fetch, setHeaders }) => {
 	const project = ossProjects.find((p) => p.id === params.id);
@@ -62,7 +38,14 @@ export const GET: RequestHandler = async ({ params, fetch, setHeaders }) => {
 	if (readme) {
 		lines.push('## README');
 		lines.push('');
-		lines.push(readme);
+		// 本文はリポジトリの README をそのまま載せる。中の相対リンクはリポジトリ基準なので、
+		// 読み手（人でも LLM でも）が解決できるように基準を先に示しておく。
+		lines.push(
+			`> Source: https://github.com/${readme.owner}/${readme.repo}/blob/${readme.branch}/README.md` +
+				` — relative links in the body resolve against that repository, not against ${SITE_URL}.`
+		);
+		lines.push('');
+		lines.push(readme.markdown);
 	}
 
 	return new Response(lines.join('\n'));
