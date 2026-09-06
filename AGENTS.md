@@ -47,13 +47,16 @@ op run --env-file=.env.cloudflare.tpl -- bun ingest/ingest.ts <file.md ...>
 デプロイ後に `site/scripts/verify-deploy.mjs` が走り、**ソースが出すと言っている製品が本番の
 ホームに実在するか**を現物で確かめる。ここが赤なら「success なのに古い建物が配られている」。
 
-続けて `site/scripts/verify-seo.mjs` が本番をクロールし、**サイト内リンク・画像の宛先が全部 200 か /
-sitemap 全件に lastmod があるか / noindex を出すべきページが出しているか / robots メタが 1 ページ
-1 つか**を確かめる。**SEO の壊れ方は静かで、ページは 200・見た目も正常・ビルドも green のまま進む。**
-実際 GitHub の README を素通しで描いていたせいで、`[LICENSE](LICENSE)` が `/oss/LICENSE` に解決され、
-存在しない URL への内部リンクが 35 ページ全部から張られたまま数ヶ月動いていた（Search Console の
-「未登録 37 件」のうち 31 件がこれ。2026-09-06 に検出・修正）。
+続けて `site/scripts/verify-seo.mjs` が本番をクロールする（内部リンク・画像の宛先 / sitemap の
+lastmod / noindex / robots メタの重複 / h1 の数 / title 幅 / www リダイレクト / .md の noindex）。
+**SEO の壊れ方は静かで、ページは 200・見た目も正常・ビルドも green のまま進む。** 実際 README を
+素通しで描いていたせいで、存在しない `/oss/LICENSE` への内部リンクが 35 ページ全部から張られた
+まま数ヶ月動いていた（2026-09-06 に検出・修正）。
 ローカルにも当てられる: `node site/scripts/verify-seo.mjs http://127.0.0.1:8788`
+
+> `http://` → `https://` はゾーン設定 **Always Use HTTPS**（2026-09-06 に on）が畳む。
+> www → apex は Worker の `hooks.server.ts`。**wrangler dev は Host を Worker まで通さないので、
+> ホスト分岐はローカルで検証できない**（本番で verify-seo が見る）。
 
 **手で叩くのは、CD を通さずに緊急で直すときだけ。** 2026-08-23 まで CD が無く、
 PR をマージしても本番が 8/8 より前のまま止まっていた（ストックレーダーがホームに出ず、

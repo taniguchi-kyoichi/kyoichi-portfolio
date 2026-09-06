@@ -1,14 +1,11 @@
 import { Marked } from 'marked';
 
 /**
- * GitHub の README を取得して、このサイトで表示できる HTML にする。
+ * GitHub の README を、このサイトで表示できる HTML にする。
  *
- * **README の中の相対リンクは、README が置かれているリポジトリを基準に書く。**
- * それをそのまま `/oss/{id}` の上に流し込むと、`[LICENSE](LICENSE)` は
- * `/oss/LICENSE` として解決されてしまう。実際 Search Console の「未登録」37件のうち
- * 31件がこれで生まれた 404 で、`/oss/README.ja.md` は 35 ページ全部から、
- * `/oss/LICENSE` は 33 ページから張られていた（2026-09-06 実測）。
- * 内部リンクが存在しない先へ流れ続けるので、クロールも評価も無駄になる。
+ * README の相対リンクはリポジトリ基準で書かれている。素通しすると
+ * `[LICENSE](LICENSE)` が `/oss/LICENSE` に解決され、存在しない URL への
+ * 内部リンクになる（2026-09 に 35 ページ全部で発生していた）。
  */
 
 export interface Readme {
@@ -56,7 +53,7 @@ function alreadyResolved(url: string): boolean {
  * README 基準の相対パスを、GitHub 自身の README ビューアと同じ解決をする。
  * `href` はリポジトリの blob、画像はレンダリングされる raw を指す。
  */
-export function resolveReadmeUrl(url: string, readme: Readme, kind: 'blob' | 'raw'): string {
+function resolveReadmeUrl(url: string, readme: Readme, kind: 'blob' | 'raw'): string {
 	if (!url || alreadyResolved(url)) return url;
 	const base =
 		kind === 'raw'
@@ -92,17 +89,18 @@ function rewriteRawHtml(html: string, readme: Readme): string {
 }
 
 /**
- * README を HTML にする。URL の書き換えは**構文木の上で**行う。
- * 生成済み HTML を正規表現で舐めると、コードブロックの中に書かれた
- * `<a href="LICENSE">` のような「例として見せているコード」まで書き換えてしまう。
- * marked は code / codespan を link / image / html とは別のトークンとして持つので、
- * 後者だけを歩けば表示用のコードは無傷で残る。
+ * 書き換えは構文木の上で行う。生成済み HTML を正規表現で舐めると、README が
+ * 例として見せている `<a href="LICENSE">` まで書き換わる。code / codespan は
+ * 別トークンなので、link / image / html だけ歩けば表示用コードは無傷で残る。
  */
 export function renderReadme(readme: Readme): string {
 	const marked = new Marked({ gfm: true, async: false });
 	marked.use({
 		walkTokens(token) {
-			if (token.type === 'link') {
+			if (token.type === 'heading') {
+				// README の `# パッケージ名` はページの <h1> と重複する。1 段下げる。
+				token.depth = Math.min(token.depth + 1, 6);
+			} else if (token.type === 'link') {
 				token.href = resolveReadmeUrl(token.href, readme, 'blob');
 			} else if (token.type === 'image') {
 				token.href = resolveReadmeUrl(token.href, readme, 'raw');

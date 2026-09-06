@@ -13,8 +13,6 @@ const NOTE_FEED = 'https://note.com/note_kyoichi/rss';
 const REIN_FEED = 'https://reinself.com/rss.xml';
 const YOUTUBE_CHANNEL_ID = 'UCmMnuEXRsrNNcW4bVeeTI8A';
 
-const ALLOWED_HOSTS = ['zenn.dev', 'note.com', 'reinself.com'];
-
 // Edge-cached fetch: external feeds change slowly, so cache 30 min to keep both
 // the agent and the SSR page loads fast and avoid hammering the sources.
 export const cachedFetch: typeof fetch = (input, init) =>
@@ -41,14 +39,4 @@ export async function getVideos(limit = 6): Promise<YouTubeVideo[]> {
 	if (!env.YOUTUBE_API_KEY) return [];
 	const playlist = await fetchYouTubeChannel(YOUTUBE_CHANNEL_ID, env.YOUTUBE_API_KEY, limit);
 	return playlist?.videos ?? [];
-}
-
-/** True if the URL points at one of Kyoichi's own content hosts (SSRF guard). */
-export function isAllowedContentUrl(url: string): boolean {
-	try {
-		const host = new URL(url).hostname;
-		return ALLOWED_HOSTS.some((h) => host === h || host.endsWith(`.${h}`));
-	} catch {
-		return false;
-	}
 }

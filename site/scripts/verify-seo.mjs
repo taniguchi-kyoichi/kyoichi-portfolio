@@ -11,6 +11,10 @@
 //   2. サイト内リンク・画像の宛先が全部 200 か（README 書き換えの退行検出）
 //   3. 存在しない URL が 404 かつ noindex で、canonical を出していないか
 //   4. robots メタが 1 ページに 1 つだけか（app.html と layout の二重出力の再発検出）
+//   5. <h1> が 1 ページ 1 つか（README の `#` がページの h1 と重複していた）
+//   6. title が検索結果の幅に収まっているか（35 件中 28 件が切れていた）
+//   7. www / http が apex + https へ恒久リダイレクトするか
+//   8. .md 版が noindex か（HTML ページと同内容なので重複になる）
 //
 // 使い方: node scripts/verify-seo.mjs [origin]
 
@@ -46,6 +50,20 @@ async function pooled(items, worker) {
   );
   return results;
 }
+
+/** 検索結果に出るのは実体参照を解いた後の文字列。数える前に戻す。 */
+const decodeEntities = (text) =>
+  text
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
+
+/** 半角=1 / 全角=2。src/lib/seo.ts の displayWidth と同じ数え方。 */
+const displayWidth = (text) =>
+  [...text].reduce((n, c) => n + (/[\x00-\xFF\uFF61-\uFF9F]/.test(c) ? 1 : 2), 0);
+const TITLE_BUDGET = 62;
 
 const robotsOf = (html) => [...html.matchAll(/<meta\s+name="robots"\s+content="([^"]*)"/gi)].map((m) => m[1]);
 const canonicalOf = (html) => html.match(/<link\s+rel="canonical"\s+href="([^"]*)"/i)?.[1] ?? null;
@@ -113,6 +131,15 @@ for (const { url, status, body } of fetched) {
     fail(`${url} に canonical が無い`);
   }
 
+  const h1 = [...body.matchAll(/<h1[\s>]/g)].length;
+  if (h1 !== 1) fail(`${url} の <h1> が ${h1} 個（1 個であるべき）`);
+
+  const title = decodeEntities(body.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.trim() ?? "");
+  const width = displayWidth(title);
+  if (width > TITLE_BUDGET) {
+    fail(`${url} の title が ${width} 幅（上限 ${TITLE_BUDGET}・検索結果で切れる）: ${title}`);
+  }
+
   for (const raw of [
     ...[...body.matchAll(/href="([^"]+)"/g)].map((m) => m[1]),
     ...[...body.matchAll(/<img[^>]+src="([^"]+)"/g)].map((m) => m[1]),
@@ -156,6 +183,44 @@ if (missing.status !== 404) {
   }
   if (canonicalOf(missing.body)) {
     fail("404 ページが canonical を出している（自分自身を正規 URL だと主張してしまう）");
+  }
+}
+
+// ---- 4. ホストとスキームの正規化 / .md 版の扱い ----------------------------
+
+// 本番以外（ローカル・preview）では www も http も存在しないので、この検査は飛ばす。
+if (new URL(ORIGIN).host === "taniguchi-kyoichi.com") {
+  for (const variant of ["http://taniguchi-kyoichi.com/", "https://www.taniguchi-kyoichi.com/"]) {
+    let res;
+    try {
+      res = await fetch(variant, { redirect: "manual", headers: { "cache-control": "no-cache" } });
+    } catch (err) {
+      fail(`${variant} を引けなかった: ${err}`);
+      continue;
+    }
+    const location = res.headers.get("location");
+    if (![301, 308].includes(res.status) || location !== `${ORIGIN}/`) {
+      fail(`${variant} が ${res.status} → ${location ?? "(リダイレクトなし)"}（${ORIGIN}/ へ 308 であるべき）`);
+    }
+  }
+}
+
+// .md は HTML ページと同じ中身を配る LLM 向けの別表現。検索に出すと重複になる。
+const mdSamples = pages
+  .filter((u) => /\/(oss|products)\/[^/]+$/.test(u))
+  .slice(0, 2)
+  .map((u) => `${u}.md`);
+for (const url of mdSamples) {
+  let res;
+  try {
+    res = await fetch(url, { headers: { "cache-control": "no-cache" } });
+  } catch (err) {
+    fail(`${url} を引けなかった: ${err}`);
+    continue;
+  }
+  if (res.status !== 200) fail(`${url} が ${res.status}`);
+  else if (!/noindex/i.test(res.headers.get("x-robots-tag") ?? "")) {
+    fail(`${url} に X-Robots-Tag: noindex が無い`);
   }
 }
 

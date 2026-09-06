@@ -34,13 +34,10 @@
 		}
 	);
 
-	// エラー応答は「そのURLの中身」ではないので、インデックスさせず canonical も出さない。
-	// +layout.server.ts は常に seo を返すため、404 でも自分自身を canonical に指す
-	// index 可能なページとして出ていた（Search Console が 404 と判定したので実害は
-	// 出ていないが、ソフト404 と読まれる余地を残す）。
+	// エラー応答はその URL の中身ではないので、index させず canonical も出さない
+	// （+layout.server.ts が常に seo を返すため、404 が自己 canonical を出していた）。
 	const isError = $derived(page.status >= 400);
-	// robots はここが唯一の出力点。app.html にも固定値を置くと noindex 指定時に
-	// 2 つ出て矛盾する。
+	// robots の出力点はここだけ。app.html にも置くと noindex 時に 2 つ出て矛盾する。
 	const noindex = $derived(isError || seo.noindex === true);
 
 	const websiteJsonLd = {

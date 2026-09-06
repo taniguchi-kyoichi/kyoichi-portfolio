@@ -8,7 +8,7 @@ import { cachedFetch } from './external';
  * data to sync from the package repos. Uses the edge-cached fetch so listing
  * pages can resolve many packages cheaply.
  */
-export async function resolveDoccUrl(repository: string): Promise<string | null> {
+async function resolveDoccUrl(repository: string): Promise<string | null> {
 	const repoMatch = repository.match(/github\.com\/([^/]+)\/([^/]+)/);
 	if (!repoMatch) return null;
 

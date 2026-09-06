@@ -307,7 +307,6 @@ export const products: Product[] = [
 	}
 ];
 
-export const featuredProducts = products.filter((p) => p.featured && !p.hidden);
 /** 通常の Products 一覧に出す（非表示・build in public を除く） */
 export const visibleProducts = products.filter((p) => !p.hidden && !p.buildInPublic);
 /** build in public 専用セクションに出す */

@@ -36,32 +36,42 @@ export const load: PageServerLoad = async ({ params }) => {
 		ogImageWidth: socialImage ? undefined : DEFAULT_OG_IMAGE_SIZE,
 		ogImageHeight: socialImage ? undefined : DEFAULT_OG_IMAGE_SIZE,
 		twitterCard: 'summary',
-		jsonLd: {
-			'@context': 'https://schema.org',
-			'@type': product.type === 'app' ? 'SoftwareApplication' : 'WebSite',
-			name: product.name,
-			description: product.description,
-			url: `${SITE_URL}/products/${product.id}`,
-			image: ogImage,
-			applicationCategory: product.category ?? 'MobileApplication',
-			operatingSystem: product.platforms.includes('ios')
-				? 'iOS'
-				: product.platforms.includes('macos')
-					? 'macOS'
-					: undefined,
-			offers: priceToOffer(product.price),
-			...(product.rating !== undefined
-				? {
-						aggregateRating: {
-							'@type': 'AggregateRating',
-							ratingValue: product.rating,
-							ratingCount: product.ratingCount ?? 1,
-							bestRating: 5
+		jsonLd: [
+			{
+				'@context': 'https://schema.org',
+				'@type': 'BreadcrumbList',
+				itemListElement: [
+					{ '@type': 'ListItem', position: 1, name: 'ホーム', item: SITE_URL },
+					{ '@type': 'ListItem', position: 2, name: product.name }
+				]
+			},
+			{
+				'@context': 'https://schema.org',
+				'@type': product.type === 'app' ? 'SoftwareApplication' : 'WebSite',
+				name: product.name,
+				description: product.description,
+				url: `${SITE_URL}/products/${product.id}`,
+				image: ogImage,
+				applicationCategory: product.category ?? 'MobileApplication',
+				operatingSystem: product.platforms.includes('ios')
+					? 'iOS'
+					: product.platforms.includes('macos')
+						? 'macOS'
+						: undefined,
+				offers: priceToOffer(product.price),
+				...(product.rating !== undefined
+					? {
+							aggregateRating: {
+								'@type': 'AggregateRating',
+								ratingValue: product.rating,
+								ratingCount: product.ratingCount ?? 1,
+								bestRating: 5
+							}
 						}
-					}
-				: {}),
-			author: { '@type': 'Person', name: profile.name, url: SITE_URL }
-		}
+					: {}),
+				author: { '@type': 'Person', name: profile.name, url: SITE_URL }
+			}
+		]
 	};
 
 	return { product, seo };

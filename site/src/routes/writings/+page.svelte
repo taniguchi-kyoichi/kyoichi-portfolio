@@ -23,11 +23,8 @@
 				技術記事・ブログ
 			</p>
 
-			<!-- Rein（reinself.com）の記事一覧への導線。/rein はヘッダーのナビから
-			     意図的に外してあるので、ここが唯一の入口になる。内部リンクが1本も無い
-			     状態では Search Console で「クロール済み - インデックス未登録」に
-			     落ちていた（2026-09-06 実測）。ページ自体は JSON-LD まで持つ
-			     インデックス前提の作りなので、導線だけ与えて拾わせる。 -->
+			<!-- /rein はヘッダーのナビから意図的に外してあるので、ここが唯一の入口。
+			     被リンクが 1 本も無い間はインデックスされていなかった。 -->
 			<a
 				href="/rein"
 				class="mt-4 inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3.5 py-1.5 text-sm text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-white"

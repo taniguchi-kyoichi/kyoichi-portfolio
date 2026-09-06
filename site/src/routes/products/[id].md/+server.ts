@@ -28,7 +28,9 @@ export const GET: RequestHandler = ({ params, setHeaders }) => {
 
 	setHeaders({
 		'content-type': 'text/markdown; charset=utf-8',
-		'cache-control': 'public, max-age=3600, stale-while-revalidate=86400'
+		'cache-control': 'public, max-age=3600, stale-while-revalidate=86400',
+		// LLM クローラー向けの同内容の別表現。HTML ページと重複するので検索には出さない。
+		'x-robots-tag': 'noindex'
 	});
 
 	const lines: string[] = [];

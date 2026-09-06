@@ -1,4 +1,4 @@
-.PHONY: help install dev build check preview clean deploy cf-preview update
+.PHONY: help install dev build check preview clean cf-preview update
 
 # Use mise to run bun commands (falls back to bun if mise is not available)
 BUN := $(shell command -v mise >/dev/null 2>&1 && echo "mise exec -- bun" || echo "bun")
@@ -16,8 +16,8 @@ help:
 	@echo "  preview    Preview production build locally"
 	@echo ""
 	@echo "Deployment:"
-	@echo "  deploy     Deploy to Cloudflare Pages"
 	@echo "  cf-preview Preview with Cloudflare Workers locally"
+	@echo "  (deploy は main マージの CD が持つ。手で出す手順は AGENTS.md)"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  clean      Remove build artifacts"
@@ -40,10 +40,6 @@ preview:
 	$(BUN) run preview
 
 # Deployment
-deploy:
-	$(BUN) run build
-	$(BUNX) wrangler deploy
-
 cf-preview:
 	$(BUN) run build
 	$(BUNX) wrangler dev

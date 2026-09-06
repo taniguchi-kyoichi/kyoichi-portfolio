@@ -436,7 +436,7 @@ export const ossKindLabel: Record<OSSKind, string> = {
 };
 
 // カテゴリ表示順（この順でセクション分けする）
-export const ossCategoryOrder = [
+const ossCategoryOrder = [
   "エージェント / プロトコル",
   "LLM / AI",
   "UI / SwiftUI",

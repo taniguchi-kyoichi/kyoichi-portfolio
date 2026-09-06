@@ -44,9 +44,8 @@ jobs:
       - name: 本番に届いたか（宣言ではなく現物を見る）
         working-directory: site
         run: node scripts/verify-deploy.mjs
-      # SEO の土台は壊れても静かなので、現物をクロールして確かめる。README を素通しで
-      # 描いていた頃、存在しない `/oss/LICENSE` への内部リンクが 35 ページ全部から
-      # 張られたまま数ヶ月動いていた（ページは 200・見た目も正常・ビルドも green）。
-      - name: SEO の土台が保たれているか（内部リンク・sitemap・noindex）
+      # SEO の壊れ方は静かで、ページは 200・見た目も正常・ビルドも green のまま進む。
+      # 実際 `/oss/LICENSE` への内部リンクが 35 ページ全部から張られたまま数ヶ月動いていた。
+      - name: SEO の土台が保たれているか（内部リンク・sitemap・noindex・h1・title 幅）
         working-directory: site
         run: node scripts/verify-seo.mjs
